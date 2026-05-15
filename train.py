@@ -69,14 +69,14 @@ def main():
                 with torch.no_grad():
                     q_values = q_net(obs_tensor)
 
-                if random.random() < args.epsilon:
+                epsilon = args.epsilon_end + (args.epsilon_start - args.epsilon_end) * math.exp(-step / args.epsilon_decay)
+                if random.random() < epsilon:
                     action = env.action_space.sample()
                 else:
                     action = q_values.argmax().item()
 
                 next_obs, reward, terminated, truncated, info = env.step(action)
                 done = terminated or truncated
-
                 episode_reward += reward
                 replay_buffer.append((obs, action, next_obs, reward, done))
 
