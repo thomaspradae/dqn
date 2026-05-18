@@ -18,7 +18,7 @@ source /home/uace/dqn/.venv/bin/activate
 mkdir -p logs runs
 
 python train.py \
-  --episodes 10 \
+  --episodes 800 \
   --batch-size 32 \
   --replay-size 100000 \
-  --outdir runs/pong_cpu_test
+  --outdir runs/pong_cpu_800
