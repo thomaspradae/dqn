@@ -1,5 +1,6 @@
 import argparse
 import csv
+import math
 import os
 import random
 from datetime import datetime
@@ -21,7 +22,9 @@ def main():
     parser.add_argument("--outdir", type=str, default=None)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--gamma", type=float, default=0.99)
-    parser.add_argument("--epsilon", type=float, default=0.1)
+    parser.add_argument("--epsilon-start", type=float, default=1.0)
+    parser.add_argument("--epsilon-end", type=float, default=0.01)
+    parser.add_argument("--epsilon-decay", type=int, default=5000)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--target-update-freq", type=int, default=100)
     parser.add_argument("--replay-size", type=int, default=50_000)
@@ -112,7 +115,7 @@ def main():
             writer.writerow([episode, episode_reward])
             f.flush()
 
-            print(f"episode={episode} reward={episode_reward}", flush=True)
+            print(f"episode={episode} reward={episode_reward} epsilon={epsilon:.3f}", flush=True)
 
             if episode % args.checkpoint_every == 0 and episode > 0:
                 torch.save(q_net.state_dict(), outdir / f"q_net_ep{episode}.pt")
