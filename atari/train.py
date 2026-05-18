@@ -52,6 +52,8 @@ def main():
     parser.add_argument("--debug-shapes", action="store_true")
     args = parser.parse_args()
 
+    torch.set_num_threads(4)
+
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 

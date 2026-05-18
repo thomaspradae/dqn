@@ -5,9 +5,9 @@
 #SBATCH --partition=office
 #SBATCH --nodelist=uaceofi1
 #SBATCH --nodes=1
-#SBATCH --time=04:00:00
+#SBATCH --time=INFINITE
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=4G
+#SBATCH --mem=6G
 
 set -euo pipefail
 
