@@ -44,15 +44,25 @@ def main():
     parser.add_argument("--epsilon-start", type=float, default=1.0)
     parser.add_argument("--epsilon-end", type=float, default=0.1)
     parser.add_argument("--epsilon-decay", type=int, default=1_000_000)
-    parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--target-update-freq", type=int, default=1_000)
-    parser.add_argument("--replay-size", type=int, default=100_000)
+    parser.add_argument("--replay-size", type=int, default=50_000)
     parser.add_argument("--checkpoint-every", type=int, default=100)
     parser.add_argument("--max-steps-per-episode", type=int, default=None)
+    parser.add_argument("--max-env-steps-total", type=int, default=None)
+    parser.add_argument("--frame-skip", type=int, default=4)
+    parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--debug-shapes", action="store_true")
     args = parser.parse_args()
 
-    torch.set_num_threads(4)
+    if args.frame_skip < 1:
+        parser.error("--frame-skip must be >= 1")
+    if args.threads < 1:
+        parser.error("--threads must be >= 1")
+    if args.max_env_steps_total is not None and args.max_env_steps_total < 1:
+        parser.error("--max-env-steps-total must be >= 1")
+
+    torch.set_num_threads(args.threads)
 
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -99,19 +109,37 @@ def main():
                 else:
                     action = q_values.argmax(dim=1).item()
 
-                next_obs, reward, terminated, truncated, info = env.step(action)
-                env_step += 1
+                total_reward = 0.0
+                next_obs = None
 
-                done = terminated or truncated
+                for _ in range(args.frame_skip):
+                    next_obs, reward, terminated, truncated, info = env.step(action)
+                    env_step += 1
+
+                    clipped_reward = max(-1.0, min(1.0, reward))
+                    total_reward += clipped_reward
+
+                    if env_step % 1000 == 0:
+                        print(
+                            f"env_step={env_step} train_step={step} "
+                            f"episode={episode} reward={episode_reward + total_reward} "
+                            f"epsilon={epsilon:.3f}",
+                            flush=True,
+                        )
+
+                    done = terminated or truncated
+                    if done:
+                        break
+
+                    if (
+                        args.max_env_steps_total is not None
+                        and env_step >= args.max_env_steps_total
+                    ):
+                        done = True
+                        break
+
                 episode_steps += 1
-                episode_reward += reward
-
-                if env_step % 1000 == 0:
-                    print(
-                        f"env_step={env_step} train_step={step} "
-                        f"episode={episode} reward={episode_reward} epsilon={epsilon:.3f}",
-                        flush=True,
-                    )
+                episode_reward += total_reward
 
                 if args.max_steps_per_episode is not None and episode_steps >= args.max_steps_per_episode:
                     done = True
@@ -120,7 +148,7 @@ def main():
                 frames.append(next_frame)
                 next_state = np.stack(frames, axis=0)
 
-                replay_buffer.append((state, action, reward, next_state, done))
+                replay_buffer.append((state, action, total_reward, next_state, done))
 
                 if len(replay_buffer) >= args.batch_size:
                     batch = random.sample(replay_buffer, args.batch_size)
@@ -162,6 +190,9 @@ def main():
 
             if episode % args.checkpoint_every == 0 and episode > 0:
                 torch.save(q_net.state_dict(), outdir / f"q_net_ep{episode}.pt")
+
+            if args.max_env_steps_total is not None and env_step >= args.max_env_steps_total:
+                break
 
     torch.save(q_net.state_dict(), outdir / "q_net_final.pt")
     env.close()
