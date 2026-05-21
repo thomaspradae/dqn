@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--epsilon-decay", type=int, default=1_000_000)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--target-update-freq", type=int, default=1_000)
-    parser.add_argument("--replay-size", type=int, default=50_000)
+    parser.add_argument("--replay-size", type=int, default=1_000_000)
     parser.add_argument("--checkpoint-every", type=int, default=100)
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--start-env-step", type=int, default=0)
