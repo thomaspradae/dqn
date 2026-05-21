@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 from network import QNetwork
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 gym.register_envs(ale_py)
 
