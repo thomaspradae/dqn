@@ -14,6 +14,9 @@ import torch.optim as optim
 
 from network import QNetwork
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
 gym.register_envs(ale_py)
 
 
@@ -59,7 +62,7 @@ def main():
     parser.add_argument("--epsilon-decay", type=int, default=1_000_000)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--target-update-freq", type=int, default=1_000)
-    parser.add_argument("--replay-size", type=int, default=50_000)
+    parser.add_argument("--replay-size", type=int, default=1_000_000)
     parser.add_argument("--checkpoint-every", type=int, default=100)
     parser.add_argument("--max-steps-per-episode", type=int, default=None)
     parser.add_argument("--max-env-steps-total", type=int, default=None)
@@ -82,8 +85,8 @@ def main():
     env = gym.make(args.env_id)
     num_actions = env.action_space.n
 
-    q_net = QNetwork(num_actions)
-    target_net = QNetwork(num_actions)
+    q_net = QNetwork(num_actions).to(device)
+    target_net = QNetwork(num_actions).to(device)
     target_net.load_state_dict(q_net.state_dict())
 
     optimizer = optim.RMSprop(q_net.parameters(), lr=args.lr, alpha=0.95, eps=0.01)
@@ -95,7 +98,7 @@ def main():
 
     if args.resume is not None:
         print(f"Loading checkpoint: {args.resume}", flush=True)
-        checkpoint = torch.load(args.resume, map_location="cpu")
+        checkpoint = torch.load(args.resume, map_location=device)
 
         if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
             q_net.load_state_dict(checkpoint["model_state_dict"])
@@ -142,7 +145,7 @@ def main():
             episode_steps = 0
 
             while not done:
-                state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+                state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(device)
 
                 with torch.no_grad():
                     q_values = q_net(state_tensor)
@@ -197,11 +200,11 @@ def main():
                     batch = random.sample(replay_buffer, args.batch_size)
                     states, actions, rewards, next_states, dones = zip(*batch)
 
-                    states = torch.tensor(np.array(states), dtype=torch.float32)
-                    actions = torch.tensor(actions, dtype=torch.long)
-                    rewards = torch.tensor(rewards, dtype=torch.float32)
-                    next_states = torch.tensor(np.array(next_states), dtype=torch.float32)
-                    dones = torch.tensor(dones, dtype=torch.float32)
+                    states = torch.tensor(np.array(states), dtype=torch.float32).to(device)
+                    actions = torch.tensor(actions, dtype=torch.long).to(device)
+                    rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+                    next_states = torch.tensor(np.array(next_states), dtype=torch.float32).to(device)
+                    dones = torch.tensor(dones, dtype=torch.float32).to(device)
 
                     if args.debug_shapes and not printed_debug_shapes:
                         print(states.shape)
