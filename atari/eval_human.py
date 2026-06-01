@@ -14,8 +14,11 @@ from network import QNetwork
 gym.register_envs(ale_py)
 
 
-def preprocess_frame(obs):
-    gray = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
+def preprocess_frame(obs, previous_obs=None):
+    if previous_obs is not None:
+        obs = np.maximum(obs, previous_obs)
+
+    gray = cv2.cvtColor(obs, cv2.COLOR_RGB2YUV)[:, :, 0]
     resized = cv2.resize(gray, (84, 84), interpolation=cv2.INTER_AREA)
     return resized
 
@@ -28,6 +31,33 @@ def make_initial_state(obs):
     return frames, np.stack(frames, axis=0)
 
 
+def get_noop_action(env):
+    get_action_meanings = getattr(env.unwrapped, "get_action_meanings", None)
+    if get_action_meanings is None:
+        return 0
+
+    action_meanings = get_action_meanings()
+    if "NOOP" in action_meanings:
+        return action_meanings.index("NOOP")
+
+    return 0
+
+
+def reset_with_noops(env, noop_max):
+    obs, info = env.reset()
+
+    if noop_max <= 0:
+        return obs, info
+
+    noop_action = get_noop_action(env)
+    for _ in range(random.randint(1, noop_max)):
+        obs, _, terminated, truncated, info = env.step(noop_action)
+        if terminated or truncated:
+            obs, info = env.reset()
+
+    return obs, info
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env-id", type=str, default="ALE/Pong-v5")
@@ -35,9 +65,15 @@ def main():
     parser.add_argument("--episodes", type=int, default=3)
     parser.add_argument("--epsilon", type=float, default=0.0)
     parser.add_argument("--frame-skip", type=int, default=4)
+    parser.add_argument("--noop-max", type=int, default=30)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--sleep", type=float, default=0.01)
     args = parser.parse_args()
+
+    if args.frame_skip < 1:
+        parser.error("--frame-skip must be >= 1")
+    if args.noop_max < 0:
+        parser.error("--noop-max must be >= 0")
 
     torch.set_num_threads(args.threads)
 
@@ -51,8 +87,9 @@ def main():
     print(f"Loaded model: {args.model}", flush=True)
 
     for episode in range(args.episodes):
-        obs, info = env.reset()
+        obs, info = reset_with_noops(env, args.noop_max)
         frames, state = make_initial_state(obs)
+        last_raw_obs = obs
 
         done = False
         episode_reward = 0.0
@@ -69,10 +106,12 @@ def main():
                 action = q_values.argmax(dim=1).item()
 
             total_reward = 0.0
-            next_obs = None
+            previous_raw_obs = last_raw_obs
 
             for _ in range(args.frame_skip):
+                previous_raw_obs = last_raw_obs
                 next_obs, reward, terminated, truncated, info = env.step(action)
+                last_raw_obs = next_obs
                 total_reward += reward
                 env.render()
                 time.sleep(args.sleep)
@@ -83,10 +122,9 @@ def main():
 
             episode_reward += total_reward
 
-            if next_obs is not None:
-                next_frame = preprocess_frame(next_obs)
-                frames.append(next_frame)
-                state = np.stack(frames, axis=0)
+            next_frame = preprocess_frame(last_raw_obs, previous_raw_obs)
+            frames.append(next_frame)
+            state = np.stack(frames, axis=0)
 
         print(f"episode={episode} reward={episode_reward}", flush=True)
 
