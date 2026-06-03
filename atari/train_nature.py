@@ -304,7 +304,7 @@ def main():
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
-    env = gym.make(args.env_id)
+    env = gym.make(args.env_id, frameskip=1, repeat_action_probability=0.0)
     num_actions = env.action_space.n
 
     q_net = QNetwork(num_actions).to(device)

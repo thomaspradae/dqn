@@ -75,7 +75,7 @@ def main():
 
     torch.set_num_threads(args.threads)
 
-    env = gym.make(args.env_id, render_mode="rgb_array")
+    env = gym.make(args.env_id, render_mode="rgb_array", frameskip=1, repeat_action_probability=0.0)
     q_net = QNetwork(env.action_space.n)
     q_net.load_state_dict(torch.load(args.model, map_location="cpu"))
     q_net.eval()
