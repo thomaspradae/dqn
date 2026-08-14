@@ -41,6 +41,13 @@ def get_noop_action(env):
     return 0
 
 
+def get_lives(env):
+    ale = getattr(env.unwrapped, "ale", None)
+    if ale is None:
+        return None
+    return ale.lives()
+
+
 def reset_with_noops(env, noop_max):
     obs, info = env.reset()
 
@@ -66,6 +73,7 @@ def main():
     parser.add_argument("--noop-max", type=int, default=30)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--out", default="pong_eval.mp4")
+    parser.add_argument("--trace-lives", action="store_true")
     args = parser.parse_args()
 
     if args.frame_skip < 1:
@@ -87,8 +95,12 @@ def main():
         obs, info = reset_with_noops(env, args.noop_max)
         frames, state = make_initial_state(obs)
         last_raw_obs = obs
+        lives = get_lives(env)
+        if args.trace_lives:
+            print(f"episode={episode} reset lives={lives}", flush=True)
         done = False
         episode_reward = 0.0
+        raw_step = 0
 
         while not done:
             state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
@@ -106,6 +118,7 @@ def main():
                 next_obs, reward, terminated, truncated, info = env.step(action)
                 last_raw_obs = next_obs
                 total_reward += reward
+                raw_step += 1
 
                 frame = env.render()
                 frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -118,6 +131,14 @@ def main():
                 writer.write(frame_bgr)
 
                 done = terminated or truncated
+                current_lives = get_lives(env)
+                if args.trace_lives and current_lives != lives:
+                    print(
+                        f"episode={episode} raw_step={raw_step} life_change {lives}->{current_lives} "
+                        f"action={action} reward={reward} done={done}",
+                        flush=True,
+                    )
+                lives = current_lives
                 if done:
                     break
 

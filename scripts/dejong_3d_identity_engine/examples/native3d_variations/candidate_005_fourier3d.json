@@ -1,0 +1,78 @@
+{
+  "id": "005",
+  "family": "fourier3d",
+  "seed": "poormans-hpc-native3d:fourier3d:0002",
+  "params": {
+    "x1_freq": 7.0,
+    "x2_freq": 8.0,
+    "y1_freq": 4.0,
+    "y2_freq": 12.0,
+    "z1_freq": 10.0,
+    "z2_freq": 2.0,
+    "x1_amp": 0.9403528587447031,
+    "y1_amp": 0.9955849277862964,
+    "z1_amp": 0.871143679080816,
+    "x2_amp": 0.4052022408466155,
+    "y2_amp": 0.2616521234020264,
+    "z2_amp": 0.2616125044069326,
+    "x1_phase": 2.5485184342334093,
+    "x2_phase": 1.687259582633171,
+    "y1_phase": 3.448331617755533,
+    "y2_phase": 0.15157213311439435,
+    "z1_phase": 5.132016685354959,
+    "z2_phase": 2.8554881713823748
+  },
+  "initial": [
+    -0.02787005052467887,
+    -0.07698653120035104,
+    -0.03769498819106064
+  ],
+  "point_count": 7904,
+  "object_metrics": {
+    "lambda2_ratio": 0.9827768742229865,
+    "lambda3_ratio": 0.7798591634402724,
+    "box_dimension": 1.2923468257325894,
+    "octant_occupancy": 1.0,
+    "radial_cv": 0.3199434562552555,
+    "voxels_18": 532.0,
+    "local_lambda2_ratio": 0.3855086852020966,
+    "local_lambda3_ratio": 0.06960270918378728
+  },
+  "object_score": 5.9,
+  "canonical_pose": {
+    "pitch_deg": 0.0,
+    "yaw_deg": 90.0,
+    "roll_deg": 0.0,
+    "perspective": 0.0
+  },
+  "projection_metrics": {
+    "coverage": 0.29555555555555557,
+    "hard_coverage": 0.09222222222222222,
+    "components": 1.0,
+    "largest_ratio": 1.0,
+    "holes": 11.0,
+    "bbox_fill": 0.4318181818181818,
+    "perimeter_ratio": 1.1353383458646618,
+    "balance": 1.0,
+    "edge_touches": 0.0,
+    "entropy": 3.0251322415046444,
+    "speckle": 0.0,
+    "depth_complexity": 0.6036121673003803,
+    "dejong_spirit": 0.830980907456157
+  },
+  "projection_score": 3.9221720182966027,
+  "total_score": 6.400172018296603,
+  "target_pose": {
+    "pitch_deg": 26.96031436905931,
+    "yaw_deg": 11.53496886342208,
+    "roll_deg": 3.4960405604647704,
+    "perspective": 0.06
+  },
+  "metadata": {
+    "dt": 1.0,
+    "burn_steps": 0,
+    "search_cameras": 24,
+    "topology": "curve",
+    "generator": "parametric_or_map"
+  }
+}

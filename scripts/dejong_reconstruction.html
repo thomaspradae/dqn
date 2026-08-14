@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De Jong Attractor — Reforged</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#07070a;
+    --panel:#111014;
+    --panel-2:#161419;
+    --hair:#2a2730;
+    --hair-soft:#1c1a20;
+    --bone:#f2ede4;
+    --muted:#8b8590;
+    --muted-2:#5c5761;
+    --ember:#ff6a1f;
+    --ember-dim:#7c2d12;
+    --gold:#f5b942;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; background:var(--void); color:var(--bone);
+    font-family:'JetBrains Mono', monospace;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    min-height:100vh;
+    display:flex; flex-direction:column;
+  }
+  .topbar{
+    padding:22px 28px 16px;
+    border-bottom:1px solid var(--hair-soft);
+    display:flex; align-items:baseline; justify-content:space-between;
+    flex-wrap:wrap; gap:8px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:20px; letter-spacing:0.02em;
+    margin:0; color:var(--bone);
+  }
+  h1 span{ color:var(--ember); }
+  .tag{
+    font-size:11px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .layout{
+    flex:1; display:flex; gap:0; min-height:0;
+  }
+  @media (max-width:900px){ .layout{ flex-direction:column; } }
+
+  .stage{
+    flex:1 1 62%; position:relative; display:flex; align-items:center; justify-content:center;
+    padding:24px; min-width:0; min-height:420px;
+  }
+  .canvas-wrap{
+    position:relative; width:100%; max-width:1100px;
+    border:1px solid var(--hair); background:#000;
+    box-shadow:0 0 0 1px #000, 0 40px 80px -30px rgba(255,106,31,0.15);
+  }
+  canvas{ display:block; width:100%; height:auto; image-rendering:auto; }
+
+  .hud{
+    position:absolute; top:0; left:0; right:0; padding:12px 16px;
+    display:flex; justify-content:space-between; font-size:11px;
+    color:var(--muted); letter-spacing:0.04em; pointer-events:none;
+    text-transform:uppercase;
+  }
+  .hud .phase{ color:var(--gold); font-weight:700; }
+  .hud .phase.recurrent{ color:var(--ember); }
+  .hud-bottom{
+    position:absolute; bottom:0; left:0; right:0; padding:12px 16px;
+    display:flex; justify-content:space-between; font-size:11px;
+    color:var(--muted-2); letter-spacing:0.03em; pointer-events:none;
+  }
+
+  .panel{
+    flex:0 0 380px; border-left:1px solid var(--hair-soft);
+    padding:24px 26px 32px; overflow-y:auto;
+    background:linear-gradient(180deg, var(--panel), var(--void) 60%);
+  }
+  @media (max-width:900px){
+    .panel{ flex:none; border-left:none; border-top:1px solid var(--hair-soft); width:100%; }
+  }
+
+  .eq{
+    background:var(--panel-2); border:1px solid var(--hair);
+    padding:14px 16px; font-size:12.5px; line-height:1.9; color:var(--bone);
+    margin-bottom:22px;
+  }
+  .eq .op{ color:var(--muted); }
+  .eq .v{ color:var(--gold); }
+
+  .section-label{
+    font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--muted-2); margin:0 0 12px; font-family:'JetBrains Mono',monospace;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after{ content:''; flex:1; height:1px; background:var(--hair-soft); }
+
+  .slider-row{ margin-bottom:14px; }
+  .slider-head{
+    display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;
+  }
+  .slider-head .name{ color:var(--bone); }
+  .slider-head .val{ color:var(--ember); }
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:2px; background:var(--hair);
+    outline:none; margin:0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:13px; height:13px; border-radius:50%;
+    background:var(--bone); cursor:pointer; border:2px solid var(--ember);
+    margin-top:-6px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:11px; height:11px; border-radius:50%; background:var(--bone);
+    border:2px solid var(--ember); cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{ height:2px; background:var(--hair); }
+  input[type=range].scrubber::-webkit-slider-thumb{ border-color:var(--gold); background:var(--gold); }
+  input[type=range].scrubber::-moz-range-thumb{ border-color:var(--gold); background:var(--gold); }
+
+  .btnrow{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+  button{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    background:transparent; color:var(--muted); border:1px solid var(--hair);
+    padding:9px 12px; cursor:pointer; letter-spacing:0.03em;
+    transition:all .15s ease;
+  }
+  button:hover{ border-color:var(--ember); color:var(--bone); }
+  button.primary{
+    background:var(--ember); border-color:var(--ember); color:#1a0a02; font-weight:700;
+  }
+  button.primary:hover{ background:var(--gold); border-color:var(--gold); }
+  button.active{ border-color:var(--gold); color:var(--gold); }
+
+  .stat-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px 16px;
+    font-size:12px; margin-bottom:22px;
+  }
+  .stat-grid .k{ color:var(--muted-2); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; }
+  .stat-grid .v{ color:var(--bone); font-size:14px; margin-top:2px; }
+  .stat-grid .v.accent{ color:var(--ember); }
+
+  p.note{
+    font-family:'Space Grotesk', sans-serif; font-size:13px; line-height:1.65;
+    color:var(--muted); margin:0 0 14px;
+  }
+  p.note b{ color:var(--bone); font-weight:600; }
+  .credit{
+    font-size:10.5px; color:var(--muted-2); line-height:1.7; margin-top:18px;
+    padding-top:16px; border-top:1px solid var(--hair-soft);
+  }
+  .credit code{ color:var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>DE JONG <span>ATTRACTOR</span> — reforged</h1>
+  <div class="tag">strange attractor · hopalong fractal</div>
+</div>
+
+<div class="layout">
+  <div class="stage">
+    <div class="canvas-wrap">
+      <canvas id="c"></canvas>
+      <div class="hud">
+        <div>iter <span id="iterCount">0</span></div>
+        <div class="phase" id="phaseLabel">TRANSIENT</div>
+      </div>
+      <div class="hud-bottom">
+        <div id="pointCount">70,000 points</div>
+        <div>fixed viewport · log-density</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="eq">
+      x<sub>n+1</sub> <span class="op">=</span> sin(<span class="v" id="eqA">-2.000</span> · y<sub>n</sub>) <span class="op">−</span> cos(<span class="v" id="eqB">-2.000</span> · x<sub>n</sub>)<br>
+      y<sub>n+1</sub> <span class="op">=</span> sin(<span class="v" id="eqC">-1.200</span> · x<sub>n</sub>) <span class="op">−</span> cos(<span class="v" id="eqD">2.000</span> · y<sub>n</sub>)
+    </div>
+
+    <p class="section-label">playhead</p>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">iteration</span><span class="val" id="valIter">0 / 120</span></div>
+      <input type="range" class="scrubber" id="scrubber" min="0" max="120" step="1" value="0">
+    </div>
+    <div class="btnrow">
+      <button id="stepBack">◂ step</button>
+      <button id="stepFwd">step ▸</button>
+      <button class="primary" id="playBtn">⏸ pause</button>
+    </div>
+
+    <p class="section-label">ramp (autoplay pacing)</p>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">start pace</span><span class="val" id="valStart">550ms</span></div>
+      <input type="range" id="sliderStart" min="150" max="900" step="10" value="550">
+    </div>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">speed-up rate</span><span class="val" id="valAccel">14%/iter</span></div>
+      <input type="range" id="sliderAccel" min="2" max="35" step="1" value="14">
+    </div>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">in-between frames</span><span class="val" id="valTweens">8</span></div>
+      <input type="range" id="sliderTweens" min="0" max="20" step="1" value="8">
+    </div>
+    <div class="stat-grid" style="margin-bottom:22px;">
+      <div><div class="k">current pace</div><div class="v accent" id="statPace">550ms</div></div>
+      <div><div class="k">mode</div><div class="v" id="statMode">autoplay</div></div>
+    </div>
+
+    <p class="section-label">coefficients</p>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">a</span><span class="val" id="valA">-2.000</span></div>
+      <input type="range" id="sliderA" min="-3" max="3" step="0.001" value="-2">
+    </div>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">b</span><span class="val" id="valB">-2.000</span></div>
+      <input type="range" id="sliderB" min="-3" max="3" step="0.001" value="-2">
+    </div>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">c</span><span class="val" id="valC">-1.200</span></div>
+      <input type="range" id="sliderC" min="-3" max="3" step="0.001" value="-1.2">
+    </div>
+    <div class="slider-row">
+      <div class="slider-head"><span class="name">d</span><span class="val" id="valD">2.000</span></div>
+      <input type="range" id="sliderD" min="-3" max="3" step="0.001" value="2">
+    </div>
+
+    <p class="section-label">presets</p>
+    <div class="btnrow">
+      <button id="presetOriginal" class="active">your video</button>
+      <button id="presetHeart">alt: hood</button>
+      <button id="presetGlobe">alt: globe</button>
+      <button id="randomize">randomize</button>
+    </div>
+
+    <div class="btnrow">
+      <button class="primary" id="reforge">↻ reforge (new seed points)</button>
+    </div>
+
+    <p class="section-label">state</p>
+    <div class="stat-grid">
+      <div><div class="k">phase</div><div class="v accent" id="statPhase">transient</div></div>
+      <div><div class="k">iterations run</div><div class="v" id="statIter">0</div></div>
+      <div><div class="k">seed points</div><div class="v" id="statPoints">70,000</div></div>
+      <div><div class="k">visits/point</div><div class="v" id="statVisits">1</div></div>
+    </div>
+
+    <p class="section-label">what's happening</p>
+    <p class="note">Every point starts <b>close to the origin</b>, packed into a small random cluster — that's the noise block you see for an instant. The very first few iterations move that whole cluster <b>together</b>, so it still reads as one coherent, folding sheet: your samurai sword.</p>
+    <p class="note">Past a handful of iterations, sensitivity to initial conditions takes over — the sheet shears, folds, and self-intersects. Points that started as neighbors are flung to opposite sides of the attractor. That's the <b>transient</b>: states visited only finitely many times, never returned to.</p>
+    <p class="note">Once every point has folded into the invariant set, the shape stops changing — you're watching the <b>recurrent</b> states, visited over and over, forever, from now on regardless of where any point began.</p>
+
+    <div class="credit">
+      Coefficients <code>a=-2, b=-2, c=-1.2, d=2</code> — found by rendering your final frame's silhouette against catalogued De Jong sets (Paul Bourke's archive), matching orientation and the wing/hole topology, then reproducing the fold-up from a fresh random seed and confirming it collapses into the same "sword → sheet → recurrent shell" sequence as your video.
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const isSmall = window.innerWidth < 700;
+  const N = isSmall ? 28000 : 70000;
+  const W = isSmall ? 640 : 960;
+  const H = isSmall ? 360 : 540;
+  const RANGE = 2.05;
+
+  const canvas = document.getElementById('c');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(W,H);
+  const density = new Uint32Array(W*H);
+
+  let xs = new Float32Array(N);
+  let ys = new Float32Array(N);
+  let nextXs = new Float32Array(N);
+  let nextYs = new Float32Array(N);
+  let seedXs = new Float32Array(N);
+  let seedYs = new Float32Array(N);
+
+  const params = { a:-2, b:-2, c:-1.2, d:2 };
+  let iter = 0;
+  let paused = false;
+  let scrubbing = false;
+  let transitionElapsed = 0;
+  let renderedAlpha = -1;
+  const TRANSIENT_THRESHOLD = 34;
+  const MAX_ITER = 120;
+
+  function prepareNext(){
+    const a=params.a,b=params.b,c=params.c,d=params.d;
+    for(let i=0;i<N;i++){
+      const x=xs[i], y=ys[i];
+      nextXs[i] = Math.sin(a*y) - Math.cos(b*x);
+      nextYs[i] = Math.sin(c*x) - Math.cos(d*y);
+    }
+  }
+
+  function seed(){
+    for(let i=0;i<N;i++){
+      seedXs[i] = (Math.random()-0.5)*1.0;
+      seedYs[i] = (Math.random()-0.5)*0.7;
+    }
+    xs.set(seedXs); ys.set(seedYs);
+    iter = 0;
+    transitionElapsed = 0;
+    renderedAlpha = -1;
+    prepareNext();
+    document.getElementById('scrubber').value = 0;
+    updateHud();
+  }
+
+  // advance exactly one iteration from current state (cheap, used by autoplay + step forward)
+  function step(){
+    [xs,nextXs] = [nextXs,xs];
+    [ys,nextYs] = [nextYs,ys];
+    iter++;
+    renderedAlpha = -1;
+    prepareNext();
+  }
+
+  // jump to an arbitrary iteration count by replaying from the stored seed —
+  // this is what makes the scrubber and step-back buttons possible
+  function gotoIteration(target){
+    target = Math.max(0, Math.min(MAX_ITER * 4, target));
+    const a=params.a,b=params.b,c=params.c,d=params.d;
+    xs.set(seedXs); ys.set(seedYs);
+    for(let n=0;n<target;n++){
+      for(let i=0;i<N;i++){
+        const x = xs[i], y = ys[i];
+        xs[i] = Math.sin(a*y) - Math.cos(b*x);
+        ys[i] = Math.sin(c*x) - Math.cos(d*y);
+      }
+    }
+    iter = target;
+    transitionElapsed = 0;
+    renderedAlpha = -1;
+    prepareNext();
+  }
+
+  // accelerating autoplay pace: slow on the first iterations, ramps up fast —
+  // tune with the "ramp" sliders
+  function currentDelay(){
+    const start = parseFloat(document.getElementById('sliderStart').value);
+    const ratePct = parseFloat(document.getElementById('sliderAccel').value);
+    const rate = ratePct/100;
+    const floor = 16;
+    return floor + (start-floor)*Math.pow(1-rate, iter);
+  }
+
+  function tweenAlpha(raw){
+    const frames = parseInt(document.getElementById('sliderTweens').value, 10);
+    if(frames <= 0) return 0;
+    const slot = Math.min(frames, Math.floor(raw*(frames+1)));
+    return slot/(frames+1);
+  }
+
+  // forge-toned LUT: black -> ember -> gold -> bone-white
+  const stops = [
+    {t:0.00, c:[7,7,10]},
+    {t:0.16, c:[40,14,10]},
+    {t:0.38, c:[124,45,18]},
+    {t:0.62, c:[224,100,20]},
+    {t:0.82, c:[245,185,66]},
+    {t:1.00, c:[248,244,232]},
+  ];
+  function lut(t){
+    if(t<=0) return stops[0].c;
+    if(t>=1) return stops[stops.length-1].c;
+    for(let i=0;i<stops.length-1;i++){
+      const s0=stops[i], s1=stops[i+1];
+      if(t>=s0.t && t<=s1.t){
+        const f = (t-s0.t)/(s1.t-s0.t);
+        return [
+          s0.c[0]+(s1.c[0]-s0.c[0])*f,
+          s0.c[1]+(s1.c[1]-s0.c[1])*f,
+          s0.c[2]+(s1.c[2]-s0.c[2])*f,
+        ];
+      }
+    }
+    return stops[stops.length-1].c;
+  }
+  // precompute 256-entry LUT for speed
+  const lutTable = new Uint8Array(256*3);
+  for(let i=0;i<256;i++){
+    const c = lut(i/255);
+    lutTable[i*3]=c[0]|0; lutTable[i*3+1]=c[1]|0; lutTable[i*3+2]=c[2]|0;
+  }
+
+  function render(alpha=0){
+    density.fill(0);
+    for(let i=0;i<N;i++){
+      const x = xs[i] + (nextXs[i]-xs[i])*alpha;
+      const y = ys[i] + (nextYs[i]-ys[i])*alpha;
+      const px = ((x+RANGE)/(2*RANGE)*W)|0;
+      const py = ((y+RANGE)/(2*RANGE)*H)|0;
+      if(px>=0 && px<W && py>=0 && py<H){
+        density[py*W+px]++;
+      }
+    }
+    let maxD = 1;
+    for(let i=0;i<density.length;i++){ if(density[i]>maxD) maxD=density[i]; }
+    const logMax = Math.log1p(maxD);
+    const data = imgData.data;
+    for(let i=0;i<density.length;i++){
+      const v = density[i];
+      let idx = 0;
+      if(v>0){
+        idx = (Math.log1p(v)/logMax*255)|0;
+        if(idx>255) idx=255;
+      }
+      const o = i*4;
+      data[o]   = lutTable[idx*3];
+      data[o+1] = lutTable[idx*3+1];
+      data[o+2] = lutTable[idx*3+2];
+      data[o+3] = 255;
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+
+  function updateHud(){
+    document.getElementById('iterCount').textContent = iter;
+    document.getElementById('statIter').textContent = iter;
+    const settled = iter >= TRANSIENT_THRESHOLD;
+    const phaseEl = document.getElementById('phaseLabel');
+    phaseEl.textContent = settled ? 'RECURRENT — ATTRACTOR REACHED' : 'TRANSIENT';
+    phaseEl.className = 'phase' + (settled ? ' recurrent' : '');
+    document.getElementById('statPhase').textContent = settled ? 'recurrent' : 'transient';
+    document.getElementById('statVisits').textContent = settled ? '∞ (cycling)' : '1 (never repeats)';
+    document.getElementById('valIter').textContent = iter + ' / ' + MAX_ITER;
+    if(!scrubbing){
+      document.getElementById('scrubber').value = Math.min(iter, MAX_ITER);
+    }
+    document.getElementById('statPace').textContent = Math.round(currentDelay()) + 'ms';
+    document.getElementById('statMode').textContent = paused ? 'paused' : 'autoplay';
+  }
+
+  function syncEq(){
+    document.getElementById('eqA').textContent = params.a.toFixed(3);
+    document.getElementById('eqB').textContent = params.b.toFixed(3);
+    document.getElementById('eqC').textContent = params.c.toFixed(3);
+    document.getElementById('eqD').textContent = params.d.toFixed(3);
+    document.getElementById('valA').textContent = params.a.toFixed(3);
+    document.getElementById('valB').textContent = params.b.toFixed(3);
+    document.getElementById('valC').textContent = params.c.toFixed(3);
+    document.getElementById('valD').textContent = params.d.toFixed(3);
+  }
+
+  // wire sliders
+  const sA=document.getElementById('sliderA'), sB=document.getElementById('sliderB'),
+        sC=document.getElementById('sliderC'), sD=document.getElementById('sliderD');
+  function clearPresetActive(){
+    document.querySelectorAll('.btnrow button.active').forEach(b=>b.classList.remove('active'));
+  }
+  function onSlide(){
+    params.a=parseFloat(sA.value); params.b=parseFloat(sB.value);
+    params.c=parseFloat(sC.value); params.d=parseFloat(sD.value);
+    syncEq(); clearPresetActive(); seed();
+  }
+  [sA,sB,sC,sD].forEach(s=>s.addEventListener('input', onSlide));
+
+  function setParams(a,b,c,d){
+    params.a=a; params.b=b; params.c=c; params.d=d;
+    sA.value=a; sB.value=b; sC.value=c; sD.value=d;
+    syncEq(); seed();
+  }
+
+  document.getElementById('presetOriginal').addEventListener('click', (e)=>{
+    clearPresetActive(); e.target.classList.add('active');
+    setParams(-2,-2,-1.2,2);
+  });
+  document.getElementById('presetHeart').addEventListener('click', (e)=>{
+    clearPresetActive(); e.target.classList.add('active');
+    setParams(1.4,-2.3,2.4,-2.1);
+  });
+  document.getElementById('presetGlobe').addEventListener('click', (e)=>{
+    clearPresetActive(); e.target.classList.add('active');
+    setParams(-2.24,0.43,-0.65,-2.43);
+  });
+  document.getElementById('randomize').addEventListener('click', (e)=>{
+    clearPresetActive();
+    const r = ()=> (Math.random()*6-3);
+    setParams(r(),r(),r(),r());
+  });
+  document.getElementById('reforge').addEventListener('click', ()=>{ seed(); render(); updateHud(); });
+
+  // play/pause
+  const playBtn = document.getElementById('playBtn');
+  playBtn.addEventListener('click', ()=>{
+    paused = !paused;
+    playBtn.textContent = paused ? '▶ play' : '⏸ pause';
+    updateHud();
+  });
+
+  // scrubber: drag to any iteration, freely, forward or backward
+  const scrubberEl = document.getElementById('scrubber');
+  scrubberEl.addEventListener('input', ()=>{
+    scrubbing = true;
+    paused = true;
+    playBtn.textContent = '▶ play';
+    gotoIteration(parseInt(scrubberEl.value, 10));
+    render();
+    updateHud();
+  });
+  scrubberEl.addEventListener('change', ()=>{ scrubbing = false; });
+
+  // single-step buttons
+  document.getElementById('stepFwd').addEventListener('click', ()=>{
+    paused = true; playBtn.textContent = '▶ play';
+    gotoIteration(iter+1);
+    render(); updateHud();
+  });
+  document.getElementById('stepBack').addEventListener('click', ()=>{
+    paused = true; playBtn.textContent = '▶ play';
+    gotoIteration(Math.max(0, iter-1));
+    render(); updateHud();
+  });
+
+  // ramp sliders just need their labels kept live
+  const sliderStart = document.getElementById('sliderStart');
+  const sliderAccel = document.getElementById('sliderAccel');
+  const sliderTweens = document.getElementById('sliderTweens');
+  function syncRamp(){
+    document.getElementById('valStart').textContent = sliderStart.value + 'ms';
+    document.getElementById('valAccel').textContent = sliderAccel.value + '%/iter';
+    document.getElementById('valTweens').textContent = sliderTweens.value;
+  }
+  sliderStart.addEventListener('input', ()=>{ syncRamp(); updateHud(); });
+  sliderAccel.addEventListener('input', ()=>{ syncRamp(); updateHud(); });
+  sliderTweens.addEventListener('input', ()=>{
+    syncRamp();
+    renderedAlpha = -1;
+    render(tweenAlpha(Math.min(0.999999, transitionElapsed/currentDelay())));
+  });
+  syncRamp();
+
+  document.getElementById('statPoints').textContent = N.toLocaleString();
+  document.getElementById('pointCount').textContent = N.toLocaleString() + ' points';
+
+  seed();
+  syncEq();
+  render();
+  updateHud();
+
+  let lastFrame = null;
+  function loop(ts){
+    if(lastFrame===null) lastFrame=ts;
+    const delta = Math.min(100, ts-lastFrame);
+    lastFrame = ts;
+    if(!paused){
+      transitionElapsed += delta;
+      let delay = currentDelay();
+      while(transitionElapsed >= delay){
+        transitionElapsed -= delay;
+        step();
+        updateHud();
+        delay = currentDelay();
+      }
+      const alpha = tweenAlpha(Math.min(0.999999, transitionElapsed/delay));
+      if(alpha !== renderedAlpha){
+        render(alpha);
+        renderedAlpha = alpha;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>

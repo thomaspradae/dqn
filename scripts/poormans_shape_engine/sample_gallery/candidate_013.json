@@ -1,0 +1,34 @@
+{
+  "family": "ikeda",
+  "family_percentile": 0.904762,
+  "family_z": 1.027051,
+  "id": "013",
+  "metadata": {
+    "iterations": 20900
+  },
+  "metrics": {
+    "bbox_fill": 0.374228,
+    "bbox_h": 0.8,
+    "bbox_w": 0.9,
+    "border_ratio": 0.0,
+    "center_offset": 0.081774,
+    "components": 1.0,
+    "coverage": 0.269444,
+    "entropy": 0.910417,
+    "hard_coverage": 0.096667,
+    "hole_area": 0.021667,
+    "holes": 4.0,
+    "largest_ratio": 1.0,
+    "perimeter_ratio": 0.849485,
+    "speckle_ratio": 0.0
+  },
+  "params": {
+    "phase": 0.3680634873094107,
+    "strength": 6.2581817497302445,
+    "u": 0.8061862955203793
+  },
+  "rank": 13,
+  "raw_score": 8.503001,
+  "seed": "poormans-hpc:ikeda:00014",
+  "selection_score": 8.935985
+}

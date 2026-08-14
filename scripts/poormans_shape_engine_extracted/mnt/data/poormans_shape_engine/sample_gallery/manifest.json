@@ -1,0 +1,927 @@
+{
+  "candidates": [
+    {
+      "family": "lissajous",
+      "family_percentile": 1.0,
+      "family_z": 1.441406,
+      "id": "001",
+      "metadata": {
+        "iterations": 11000
+      },
+      "metrics": {
+        "bbox_fill": 0.372253,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.866667,
+        "border_ratio": 0.0,
+        "center_offset": 0.0,
+        "components": 1.0,
+        "coverage": 0.301111,
+        "entropy": 0.926453,
+        "hard_coverage": 0.113333,
+        "hole_area": 0.138889,
+        "holes": 12.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.929889,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "A": 0.9039109866280062,
+        "B": 0.5861110142739916,
+        "C": 0.8974857964676078,
+        "D": 0.5903058556842264,
+        "ax": 9,
+        "ay": 3,
+        "bx": 1,
+        "by": 5,
+        "p1": 4.885890572816149,
+        "p2": 2.443546200990097,
+        "p3": 1.56000550241461,
+        "p4": 0.3956509101019801
+      },
+      "rank": 1,
+      "raw_score": 8.813807,
+      "seed": "poormans-hpc:lissajous:00005",
+      "selection_score": 9.369541
+    },
+    {
+      "family": "dejong",
+      "family_percentile": 1.0,
+      "family_z": 1.413336,
+      "id": "002",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.368234,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.039088,
+        "components": 1.0,
+        "coverage": 0.287222,
+        "entropy": 0.942856,
+        "hard_coverage": 0.124444,
+        "hole_area": 0.229444,
+        "holes": 7.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.998066,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "a": -2.2448988206123275,
+        "b": 0.11211734185932681,
+        "c": -0.8215309799602162,
+        "d": -2.5580102684411274
+      },
+      "rank": 2,
+      "raw_score": 8.791273,
+      "seed": "poormans-hpc:dejong:00009",
+      "selection_score": 9.339934
+    },
+    {
+      "family": "dejong",
+      "family_percentile": 0.958333,
+      "family_z": 1.262515,
+      "id": "003",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.406923,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.833333,
+        "border_ratio": 0.0,
+        "center_offset": 0.158077,
+        "components": 6.0,
+        "coverage": 0.293889,
+        "entropy": 0.903945,
+        "hard_coverage": 0.111667,
+        "hole_area": 0.127222,
+        "holes": 8.0,
+        "largest_ratio": 0.975425,
+        "perimeter_ratio": 0.8431,
+        "speckle_ratio": 0.007561
+      },
+      "params": {
+        "a": 1.1036280556024876,
+        "b": -2.3488637200949047,
+        "c": 2.036618846987413,
+        "d": -1.9166980759704617
+      },
+      "rank": 3,
+      "raw_score": 8.64764,
+      "seed": "poormans-hpc:dejong:00031",
+      "selection_score": 9.150273
+    },
+    {
+      "family": "lissajous",
+      "family_percentile": 0.967742,
+      "family_z": 1.050201,
+      "id": "004",
+      "metadata": {
+        "iterations": 11000
+      },
+      "metrics": {
+        "bbox_fill": 0.366618,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.816667,
+        "border_ratio": 0.0,
+        "center_offset": 0.098668,
+        "components": 1.0,
+        "coverage": 0.279444,
+        "entropy": 0.91026,
+        "hard_coverage": 0.102778,
+        "hole_area": 0.110556,
+        "holes": 18.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.95825,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "A": 0.7137306115077741,
+        "B": 0.6875695782145763,
+        "C": 0.8840916135564111,
+        "D": 0.4139953047572878,
+        "ax": 7,
+        "ay": 9,
+        "bx": 6,
+        "by": 5,
+        "p1": 5.876640153170116,
+        "p2": 0.736218471302138,
+        "p3": 4.291294772963068,
+        "p4": 0.7343465486141106
+      },
+      "rank": 4,
+      "raw_score": 8.690799,
+      "seed": "poormans-hpc:lissajous:00025",
+      "selection_score": 9.14174
+    },
+    {
+      "family": "clifford",
+      "family_percentile": 1.0,
+      "family_z": 0.805443,
+      "id": "005",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.353989,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.06437,
+        "components": 3.0,
+        "coverage": 0.276111,
+        "entropy": 0.924625,
+        "hard_coverage": 0.097222,
+        "hole_area": 0.172778,
+        "holes": 9.0,
+        "largest_ratio": 0.995976,
+        "perimeter_ratio": 1.042254,
+        "speckle_ratio": 0.004024
+      },
+      "params": {
+        "a": -1.1041031095759806,
+        "b": 1.9345637982441313,
+        "c": 0.6809621647444689,
+        "d": 0.547098659926817
+      },
+      "rank": 5,
+      "raw_score": 8.742737,
+      "seed": "poormans-hpc:clifford:00014",
+      "selection_score": 9.138208
+    },
+    {
+      "family": "lissajous",
+      "family_percentile": 0.935484,
+      "family_z": 0.996445,
+      "id": "006",
+      "metadata": {
+        "iterations": 11000
+      },
+      "metrics": {
+        "bbox_fill": 0.386054,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.7,
+        "border_ratio": 0.0,
+        "center_offset": 0.0,
+        "components": 1.0,
+        "coverage": 0.252222,
+        "entropy": 0.868887,
+        "hard_coverage": 0.106667,
+        "hole_area": 0.162222,
+        "holes": 9.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.030837,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "A": 0.8648263964217024,
+        "B": 0.4803420589772087,
+        "C": 1.0135999155823208,
+        "D": 0.2656215833969017,
+        "ax": 9,
+        "ay": 1,
+        "bx": 3,
+        "by": 7,
+        "p1": 2.8247750875966116,
+        "p2": 4.243681859637235,
+        "p3": 2.05468226966917,
+        "p4": 0.6934077982811049
+      },
+      "rank": 6,
+      "raw_score": 8.673897,
+      "seed": "poormans-hpc:lissajous:00023",
+      "selection_score": 9.105081
+    },
+    {
+      "family": "lissajous",
+      "family_percentile": 0.903226,
+      "family_z": 0.951399,
+      "id": "007",
+      "metadata": {
+        "iterations": 11000
+      },
+      "metrics": {
+        "bbox_fill": 0.395089,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.8,
+        "border_ratio": 0.0,
+        "center_offset": 0.032885,
+        "components": 1.0,
+        "coverage": 0.295,
+        "entropy": 0.920504,
+        "hard_coverage": 0.12,
+        "hole_area": 0.091111,
+        "holes": 18.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.885122,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "A": 0.700938984828378,
+        "B": 0.32576182710161283,
+        "C": 0.726542395181726,
+        "D": 0.2327589796534475,
+        "ax": 6,
+        "ay": 9,
+        "bx": 7,
+        "by": 8,
+        "p1": 4.620726035172312,
+        "p2": 1.5210081765644818,
+        "p3": 0.35169514407023433,
+        "p4": 3.639664106622256
+      },
+      "rank": 7,
+      "raw_score": 8.659733,
+      "seed": "poormans-hpc:lissajous:00006",
+      "selection_score": 9.073356
+    },
+    {
+      "family": "dejong",
+      "family_percentile": 0.916667,
+      "family_z": 1.188804,
+      "id": "008",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.377959,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.866667,
+        "border_ratio": 0.0,
+        "center_offset": 0.129507,
+        "components": 9.0,
+        "coverage": 0.283889,
+        "entropy": 0.892771,
+        "hard_coverage": 0.115556,
+        "hole_area": 0.132222,
+        "holes": 5.0,
+        "largest_ratio": 0.972603,
+        "perimeter_ratio": 0.868885,
+        "speckle_ratio": 0.019569
+      },
+      "params": {
+        "a": 1.1504140582765,
+        "b": -2.3598824892870325,
+        "c": 2.223958296969601,
+        "d": -1.9009456070297253
+      },
+      "rank": 8,
+      "raw_score": 8.577441,
+      "seed": "poormans-hpc:dejong:00012",
+      "selection_score": 9.053478
+    },
+    {
+      "family": "hypotrochoid",
+      "family_percentile": 1.0,
+      "family_z": 1.053924,
+      "id": "009",
+      "metadata": {
+        "iterations": 12100
+      },
+      "metrics": {
+        "bbox_fill": 0.328869,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.8,
+        "border_ratio": 0.0,
+        "center_offset": 0.0,
+        "components": 1.0,
+        "coverage": 0.245556,
+        "entropy": 0.906257,
+        "hard_coverage": 0.136667,
+        "hole_area": 0.26,
+        "holes": 13.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.104072,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "R": 10,
+        "d": 12.058781147216155,
+        "phase": 5.534344972155537,
+        "r": 7
+      },
+      "rank": 9,
+      "raw_score": 8.572195,
+      "seed": "poormans-hpc:hypotrochoid:00009",
+      "selection_score": 9.030283
+    },
+    {
+      "family": "ikeda",
+      "family_percentile": 1.0,
+      "family_z": 1.062579,
+      "id": "010",
+      "metadata": {
+        "iterations": 20900
+      },
+      "metrics": {
+        "bbox_fill": 0.359568,
+        "bbox_h": 0.8,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.070646,
+        "components": 1.0,
+        "coverage": 0.258889,
+        "entropy": 0.928818,
+        "hard_coverage": 0.098333,
+        "hole_area": 0.024444,
+        "holes": 5.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.922747,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "phase": 0.3947387590052724,
+        "strength": 6.299120979077464,
+        "u": 0.796135158254016
+      },
+      "rank": 10,
+      "raw_score": 8.523341,
+      "seed": "poormans-hpc:ikeda:00024",
+      "selection_score": 8.983611
+    },
+    {
+      "family": "hypotrochoid",
+      "family_percentile": 0.967742,
+      "family_z": 1.003174,
+      "id": "011",
+      "metadata": {
+        "iterations": 12100
+      },
+      "metrics": {
+        "bbox_fill": 0.291429,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.833333,
+        "border_ratio": 0.0,
+        "center_offset": 0.0,
+        "components": 1.0,
+        "coverage": 0.226667,
+        "entropy": 0.878244,
+        "hard_coverage": 0.104444,
+        "hole_area": 0.124444,
+        "holes": 9.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.117647,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "R": 8,
+        "d": 2.503131141147004,
+        "phase": 0.7180486339465438,
+        "r": 3
+      },
+      "rank": 11,
+      "raw_score": 8.516285,
+      "seed": "poormans-hpc:hypotrochoid:00008",
+      "selection_score": 8.955375
+    },
+    {
+      "family": "ikeda",
+      "family_percentile": 0.952381,
+      "family_z": 1.031689,
+      "id": "012",
+      "metadata": {
+        "iterations": 20900
+      },
+      "metrics": {
+        "bbox_fill": 0.372896,
+        "bbox_h": 0.733333,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.082431,
+        "components": 3.0,
+        "coverage": 0.246111,
+        "entropy": 0.946933,
+        "hard_coverage": 0.115556,
+        "hole_area": 0.022778,
+        "holes": 5.0,
+        "largest_ratio": 0.972912,
+        "perimeter_ratio": 0.89842,
+        "speckle_ratio": 0.002257
+      },
+      "params": {
+        "phase": 0.4299109735747149,
+        "strength": 6.2423658736594145,
+        "u": 0.794879597227756
+      },
+      "rank": 12,
+      "raw_score": 8.505657,
+      "seed": "poormans-hpc:ikeda:00013",
+      "selection_score": 8.948976
+    },
+    {
+      "family": "ikeda",
+      "family_percentile": 0.904762,
+      "family_z": 1.027051,
+      "id": "013",
+      "metadata": {
+        "iterations": 20900
+      },
+      "metrics": {
+        "bbox_fill": 0.374228,
+        "bbox_h": 0.8,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.081774,
+        "components": 1.0,
+        "coverage": 0.269444,
+        "entropy": 0.910417,
+        "hard_coverage": 0.096667,
+        "hole_area": 0.021667,
+        "holes": 4.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.849485,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "phase": 0.3680634873094107,
+        "strength": 6.2581817497302445,
+        "u": 0.8061862955203793
+      },
+      "rank": 13,
+      "raw_score": 8.503001,
+      "seed": "poormans-hpc:ikeda:00014",
+      "selection_score": 8.935985
+    },
+    {
+      "family": "hypotrochoid",
+      "family_percentile": 0.935484,
+      "family_z": 0.939657,
+      "id": "014",
+      "metadata": {
+        "iterations": 12100
+      },
+      "metrics": {
+        "bbox_fill": 0.376429,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.833333,
+        "border_ratio": 0.0,
+        "center_offset": 0.005124,
+        "components": 1.0,
+        "coverage": 0.292778,
+        "entropy": 0.934785,
+        "hard_coverage": 0.172222,
+        "hole_area": 0.219444,
+        "holes": 20.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.013283,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "R": 13,
+        "d": 12.973080108648851,
+        "phase": 5.545448876957185,
+        "r": 9
+      },
+      "rank": 14,
+      "raw_score": 8.446309,
+      "seed": "poormans-hpc:hypotrochoid:00007",
+      "selection_score": 8.863184
+    },
+    {
+      "family": "hypotrochoid",
+      "family_percentile": 0.903226,
+      "family_z": 0.938938,
+      "id": "015",
+      "metadata": {
+        "iterations": 12100
+      },
+      "metrics": {
+        "bbox_fill": 0.305714,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.833333,
+        "border_ratio": 0.0,
+        "center_offset": 0.0,
+        "components": 1.0,
+        "coverage": 0.237778,
+        "entropy": 0.895145,
+        "hard_coverage": 0.13,
+        "hole_area": 0.015556,
+        "holes": 6.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.953271,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "R": 8,
+        "d": 3.6116209554317074,
+        "phase": 5.733933707304446,
+        "r": 5
+      },
+      "rank": 15,
+      "raw_score": 8.445517,
+      "seed": "poormans-hpc:hypotrochoid:00010",
+      "selection_score": 8.856001
+    },
+    {
+      "family": "lissajous",
+      "family_percentile": 0.870968,
+      "family_z": 0.55792,
+      "id": "016",
+      "metadata": {
+        "iterations": 11000
+      },
+      "metrics": {
+        "bbox_fill": 0.435185,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.044616,
+        "components": 6.0,
+        "coverage": 0.339444,
+        "entropy": 0.86001,
+        "hard_coverage": 0.102222,
+        "hole_area": 0.045556,
+        "holes": 9.0,
+        "largest_ratio": 0.903437,
+        "perimeter_ratio": 0.919804,
+        "speckle_ratio": 0.00491
+      },
+      "params": {
+        "A": 0.8155823273062612,
+        "B": 0.6061969598440011,
+        "C": 0.9575261362495948,
+        "D": 0.6977036284205151,
+        "ax": 3,
+        "ay": 9,
+        "bx": 1,
+        "by": 8,
+        "p1": 1.1149919543265339,
+        "p2": 5.45833977078621,
+        "p3": 5.442156744598267,
+        "p4": 5.168860990230936
+      },
+      "rank": 16,
+      "raw_score": 8.53601,
+      "seed": "poormans-hpc:lissajous:00007",
+      "selection_score": 8.844267
+    },
+    {
+      "family": "ikeda",
+      "family_percentile": 0.857143,
+      "family_z": 0.916614,
+      "id": "017",
+      "metadata": {
+        "iterations": 20900
+      },
+      "metrics": {
+        "bbox_fill": 0.37037,
+        "bbox_h": 0.733333,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.065655,
+        "components": 1.0,
+        "coverage": 0.244444,
+        "entropy": 0.923535,
+        "hard_coverage": 0.099444,
+        "hole_area": 0.024444,
+        "holes": 4.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.963636,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "phase": 0.4341060296688032,
+        "strength": 6.316496565755685,
+        "u": 0.7844477621524569
+      },
+      "rank": 17,
+      "raw_score": 8.439777,
+      "seed": "poormans-hpc:ikeda:00025",
+      "selection_score": 8.835764
+    },
+    {
+      "family": "hopalong",
+      "family_percentile": 1.0,
+      "family_z": 1.526816,
+      "id": "018",
+      "metadata": {
+        "iterations": 19800
+      },
+      "metrics": {
+        "bbox_fill": 0.516272,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.866667,
+        "border_ratio": 0.0,
+        "center_offset": 0.003262,
+        "components": 1.0,
+        "coverage": 0.387778,
+        "entropy": 0.843752,
+        "hard_coverage": 0.088889,
+        "hole_area": 0.177778,
+        "holes": 22.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.810888,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "a": -1.8170196904289173,
+        "b": 1.322355921970999,
+        "c": 3.335050825469052
+      },
+      "rank": 18,
+      "raw_score": 8.242685,
+      "seed": "poormans-hpc:hopalong:00022",
+      "selection_score": 8.819943
+    },
+    {
+      "family": "ikeda",
+      "family_percentile": 0.809524,
+      "family_z": 0.85798,
+      "id": "019",
+      "metadata": {
+        "iterations": 20900
+      },
+      "metrics": {
+        "bbox_fill": 0.347222,
+        "bbox_h": 0.8,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.081374,
+        "components": 1.0,
+        "coverage": 0.25,
+        "entropy": 0.90246,
+        "hard_coverage": 0.079444,
+        "hole_area": 0.025556,
+        "holes": 5.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 0.968889,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "phase": 0.36102040340539265,
+        "strength": 6.239140605666248,
+        "u": 0.7901631840876482
+      },
+      "rank": 19,
+      "raw_score": 8.406209,
+      "seed": "poormans-hpc:ikeda:00022",
+      "selection_score": 8.778254
+    },
+    {
+      "family": "clifford",
+      "family_percentile": 0.956522,
+      "family_z": 0.567134,
+      "id": "020",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.521991,
+        "bbox_h": 0.533333,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.031958,
+        "components": 2.0,
+        "coverage": 0.250556,
+        "entropy": 0.980802,
+        "hard_coverage": 0.132222,
+        "hole_area": 0.078333,
+        "holes": 5.0,
+        "largest_ratio": 0.997783,
+        "perimeter_ratio": 0.949002,
+        "speckle_ratio": 0.002217
+      },
+      "params": {
+        "a": -1.4206872005322804,
+        "b": 1.680402992337601,
+        "c": -0.31199585874353797,
+        "d": -1.1671758420384344
+      },
+      "rank": 20,
+      "raw_score": 8.408094,
+      "seed": "poormans-hpc:clifford:00031",
+      "selection_score": 8.735142
+    },
+    {
+      "family": "hypotrochoid",
+      "family_percentile": 0.870968,
+      "family_z": 0.83154,
+      "id": "021",
+      "metadata": {
+        "iterations": 12100
+      },
+      "metrics": {
+        "bbox_fill": 0.378571,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.833333,
+        "border_ratio": 0.0,
+        "center_offset": 0.019259,
+        "components": 1.0,
+        "coverage": 0.294444,
+        "entropy": 0.914243,
+        "hard_coverage": 0.178889,
+        "hole_area": 0.266111,
+        "holes": 23.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.045283,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "R": 11,
+        "d": 14.517201043959107,
+        "phase": 0.15728404431454945,
+        "r": 7
+      },
+      "rank": 21,
+      "raw_score": 8.327201,
+      "seed": "poormans-hpc:hypotrochoid:00004",
+      "selection_score": 8.70441
+    },
+    {
+      "family": "superformula",
+      "family_percentile": 1.0,
+      "family_z": 1.703176,
+      "id": "022",
+      "metadata": {
+        "iterations": 9900
+      },
+      "metrics": {
+        "bbox_fill": 0.339973,
+        "bbox_h": 0.933333,
+        "bbox_w": 0.866667,
+        "border_ratio": 0.0,
+        "center_offset": 0.003374,
+        "components": 1.0,
+        "coverage": 0.275,
+        "entropy": 0.80519,
+        "hard_coverage": 0.056667,
+        "hole_area": 0.145556,
+        "holes": 12.0,
+        "largest_ratio": 1.0,
+        "perimeter_ratio": 1.305051,
+        "speckle_ratio": 0.0
+      },
+      "params": {
+        "m": 14,
+        "n1": 0.5284654710336872,
+        "n2": 3.149903565539042,
+        "n3": 3.490723777003443,
+        "phase": 2.531165874514291,
+        "warp": -0.025729007277223576,
+        "warp_freq": 6
+      },
+      "rank": 22,
+      "raw_score": 8.070634,
+      "seed": "poormans-hpc:superformula:00009",
+      "selection_score": 8.692335
+    },
+    {
+      "family": "clifford",
+      "family_percentile": 0.913043,
+      "family_z": 0.525919,
+      "id": "023",
+      "metadata": {
+        "iterations": 23100
+      },
+      "metrics": {
+        "bbox_fill": 0.404321,
+        "bbox_h": 0.8,
+        "bbox_w": 0.9,
+        "border_ratio": 0.0,
+        "center_offset": 0.176906,
+        "components": 3.0,
+        "coverage": 0.291111,
+        "entropy": 0.949948,
+        "hard_coverage": 0.125556,
+        "hole_area": 0.062222,
+        "holes": 6.0,
+        "largest_ratio": 0.994275,
+        "perimeter_ratio": 0.679389,
+        "speckle_ratio": 0.005725
+      },
+      "params": {
+        "a": 1.5218753878657398,
+        "b": 1.9607775296720455,
+        "c": 0.6087766921565783,
+        "d": 0.951549336391492
+      },
+      "rank": 23,
+      "raw_score": 8.350219,
+      "seed": "poormans-hpc:clifford:00013",
+      "selection_score": 8.658512
+    },
+    {
+      "family": "gumowski_mira",
+      "family_percentile": 1.0,
+      "family_z": 1.231173,
+      "id": "024",
+      "metadata": {
+        "iterations": 18700
+      },
+      "metrics": {
+        "bbox_fill": 0.344702,
+        "bbox_h": 0.866667,
+        "bbox_w": 0.883333,
+        "border_ratio": 0.0,
+        "center_offset": 0.143209,
+        "components": 2.0,
+        "coverage": 0.263889,
+        "entropy": 0.832435,
+        "hard_coverage": 0.057222,
+        "hole_area": 0.011667,
+        "holes": 4.0,
+        "largest_ratio": 0.997895,
+        "perimeter_ratio": 0.694737,
+        "speckle_ratio": 0.002105
+      },
+      "params": {
+        "a": 0.010687014368548646,
+        "b": 0.04532743663628743,
+        "mu": -0.5633659065934268
+      },
+      "rank": 24,
+      "raw_score": 8.092572,
+      "seed": "poormans-hpc:gumowski_mira:00030",
+      "selection_score": 8.595327
+    }
+  ],
+  "engine": "poormans-shape-engine",
+  "pool_by_family": {
+    "clifford": 24,
+    "dejong": 25,
+    "gumowski_mira": 22,
+    "hopalong": 31,
+    "hypotrochoid": 32,
+    "ikeda": 22,
+    "lissajous": 32,
+    "superformula": 30
+  },
+  "pool_size": 218,
+  "render": {
+    "blur_passes": 1,
+    "cell_aspect": 0.55,
+    "gamma": 0.82,
+    "hard_threshold": 0.52,
+    "ink_threshold": 0.22,
+    "margin": 0.06,
+    "pca_align": true,
+    "pool_max_weight": 0.72,
+    "ramp": " \u2591\u2592\u2593\u2588",
+    "supersample": 4,
+    "term_height": 30,
+    "term_width": 60
+  },
+  "schema_version": 2,
+  "search": {
+    "count": 24,
+    "family_balance": 0.35,
+    "iteration_scale": 0.55,
+    "max_per_family": 5,
+    "max_similarity": 0.89,
+    "per_family": 32,
+    "seed": "poormans-hpc",
+    "seed_each_family": true
+  },
+  "selected_by_family": {
+    "clifford": 3,
+    "dejong": 3,
+    "gumowski_mira": 1,
+    "hopalong": 1,
+    "hypotrochoid": 5,
+    "ikeda": 5,
+    "lissajous": 5,
+    "superformula": 1
+  }
+}

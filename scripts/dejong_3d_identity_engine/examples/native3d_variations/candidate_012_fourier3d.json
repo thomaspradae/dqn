@@ -1,0 +1,78 @@
+{
+  "id": "012",
+  "family": "fourier3d",
+  "seed": "poormans-hpc-native3d:fourier3d:0000",
+  "params": {
+    "x1_freq": 2.0,
+    "x2_freq": 7.0,
+    "x1_amp": 1.0,
+    "x2_amp": 0.42,
+    "x1_phase": 0.0,
+    "x2_phase": 0.7,
+    "y1_freq": 3.0,
+    "y2_freq": 8.0,
+    "y1_amp": 1.0,
+    "y2_amp": 0.38,
+    "y1_phase": 1.1,
+    "y2_phase": 2.2,
+    "z1_freq": 5.0,
+    "z2_freq": 9.0,
+    "z1_amp": 1.0,
+    "z2_amp": 0.46,
+    "z1_phase": 0.4,
+    "z2_phase": 1.8
+  },
+  "initial": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "point_count": 7904,
+  "object_metrics": {
+    "lambda2_ratio": 0.9686484654023163,
+    "lambda3_ratio": 0.9333244840031806,
+    "box_dimension": 1.1494203372847183,
+    "octant_occupancy": 1.0,
+    "radial_cv": 0.3357300463249257,
+    "voxels_18": 301.0,
+    "local_lambda2_ratio": 0.1685906681396876,
+    "local_lambda3_ratio": 0.001147253745820087
+  },
+  "object_score": 5.799355930316354,
+  "canonical_pose": {
+    "pitch_deg": -51.72666937617038,
+    "yaw_deg": 89.26119036072072,
+    "roll_deg": -104.52584246606278,
+    "perspective": 0.17399719538190628
+  },
+  "projection_metrics": {
+    "coverage": 0.2588888888888889,
+    "hard_coverage": 0.07111111111111111,
+    "components": 1.0,
+    "largest_ratio": 1.0,
+    "holes": 17.0,
+    "bbox_fill": 0.34672619047619047,
+    "perimeter_ratio": 1.2231759656652361,
+    "balance": 0.9098712446351931,
+    "edge_touches": 0.0,
+    "entropy": 3.203263256243943,
+    "speckle": 0.0,
+    "depth_complexity": 0.33877551020408164,
+    "dejong_spirit": 0.7480980267470877
+  },
+  "projection_score": 3.8391773583031252,
+  "total_score": 6.274906849035993,
+  "target_pose": {
+    "pitch_deg": -16.920237904805305,
+    "yaw_deg": 41.17206319203581,
+    "roll_deg": -105.65269875033488,
+    "perspective": 0.2
+  },
+  "metadata": {
+    "dt": 1.0,
+    "burn_steps": 0,
+    "search_cameras": 24,
+    "topology": "curve",
+    "generator": "parametric_or_map"
+  }
+}

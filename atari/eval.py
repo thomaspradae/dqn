@@ -13,18 +13,27 @@ from network import QNetwork
 
 gym.register_envs(ale_py)
 
+RESIZE_INTERPOLATIONS = {
+    "area": cv2.INTER_AREA,
+    "bilinear": cv2.INTER_LINEAR,
+}
 
-def preprocess_frame(obs, previous_obs=None):
+
+def preprocess_frame(obs, previous_obs=None, resize_interpolation="area"):
     if previous_obs is not None:
         obs = np.maximum(obs, previous_obs)
 
     gray = cv2.cvtColor(obs, cv2.COLOR_RGB2YUV)[:, :, 0]
-    resized = cv2.resize(gray, (84, 84), interpolation=cv2.INTER_AREA)
+    resized = cv2.resize(
+        gray,
+        (84, 84),
+        interpolation=RESIZE_INTERPOLATIONS[resize_interpolation],
+    )
     return resized
 
 
-def make_initial_state(obs):
-    frame = preprocess_frame(obs)
+def make_initial_state(obs, resize_interpolation):
+    frame = preprocess_frame(obs, resize_interpolation=resize_interpolation)
     frames = deque(maxlen=4)
 
     for _ in range(4):
@@ -61,6 +70,22 @@ def reset_with_noops(env, noop_max):
     return obs, info
 
 
+def extract_q_state_dict(checkpoint):
+    if isinstance(checkpoint, dict):
+        for key in ("q_net", "model_state_dict", "state_dict"):
+            value = checkpoint.get(key)
+            if isinstance(value, dict):
+                return value
+    return checkpoint
+
+
+def load_model_checkpoint(path):
+    try:
+        return torch.load(path, map_location="cpu", weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location="cpu")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env-id", type=str, default="ALE/Pong-v5")
@@ -71,6 +96,12 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--epsilon", type=float, default=0.05)
     parser.add_argument("--max-steps-per-episode", type=int, default=4500)
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument(
+        "--resize-interpolation",
+        choices=tuple(RESIZE_INTERPOLATIONS),
+        default="area",
+    )
     args = parser.parse_args()
 
     if args.frame_skip < 1:
@@ -79,13 +110,21 @@ def main():
         parser.error("--noop-max must be >= 0")
 
     torch.set_num_threads(args.threads)
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
     env = gym.make(args.env_id, frameskip=1, repeat_action_probability=0.0)
+    if args.seed is not None:
+        env.action_space.seed(args.seed)
+        if hasattr(env.observation_space, "seed"):
+            env.observation_space.seed(args.seed)
     num_actions = env.action_space.n
 
     q_net = QNetwork(num_actions)
-    checkpoint = torch.load(args.model, map_location="cpu")
-    q_net.load_state_dict(checkpoint)
+    checkpoint = load_model_checkpoint(args.model)
+    q_net.load_state_dict(extract_q_state_dict(checkpoint))
     q_net.eval()
 
     rewards = []
@@ -95,7 +134,7 @@ def main():
 
     for episode in range(args.episodes):
         obs, info = reset_with_noops(env, args.noop_max)
-        frames, state = make_initial_state(obs)
+        frames, state = make_initial_state(obs, args.resize_interpolation)
         last_raw_obs = obs
 
         done = False
@@ -132,7 +171,11 @@ def main():
             if args.max_steps_per_episode is not None and episode_steps >= args.max_steps_per_episode:
                 done = True
 
-            next_frame = preprocess_frame(last_raw_obs, previous_raw_obs)
+            next_frame = preprocess_frame(
+                last_raw_obs,
+                previous_raw_obs,
+                resize_interpolation=args.resize_interpolation,
+            )
             frames.append(next_frame)
             state = np.stack(frames, axis=0)
 

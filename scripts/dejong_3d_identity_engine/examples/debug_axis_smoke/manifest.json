@@ -1,0 +1,136 @@
+{
+  "engine": "dejong-3d-identity-animation",
+  "code": "node:ofi1",
+  "mode": "surface",
+  "profile": "clean",
+  "axis_gizmo": true,
+  "fps": 24.0,
+  "frame_count": 8,
+  "target": {
+    "id": "",
+    "rank": 0,
+    "code": "node:ofi1",
+    "raw_score": 2.142938,
+    "identity_score": 1.645267,
+    "expressive_score": 1.30966,
+    "metrics": {
+      "coverage": 0.410556,
+      "hard_coverage": 0.165,
+      "components": 6.0,
+      "largest_ratio": 0.982409,
+      "holes": 9.0,
+      "bbox_fill": 0.526353,
+      "perimeter_ratio": 64.086604,
+      "balance": 0.841678,
+      "edge_touches": 0.0,
+      "entropy": 3.396004,
+      "speckle": 0.333333
+    },
+    "spec": {
+      "code": "node:ofi1",
+      "mode": "surface",
+      "yaw_deg": 26.876868424848517,
+      "pitch_deg": -5.659109015967768,
+      "roll_deg": -6.191417568579526,
+      "depth": 0.6145319110453815,
+      "gamma": 0.7477061017416231,
+      "thickness": 0.2356560373175574,
+      "ripple_x_amp": 0.009003137952164354,
+      "ripple_y_amp": 0.042889555954561884,
+      "ripple_r_amp": 0.05148220190001435,
+      "ripple_x_freq": 2,
+      "ripple_y_freq": 1,
+      "ripple_r_freq": 2,
+      "ripple_x_phase": 1.39765871592849,
+      "ripple_y_phase": 2.8683528687957605,
+      "ripple_r_phase": 3.795614960314765,
+      "twist": -0.13053390176057406,
+      "perspective": 0.6102843846550161,
+      "focal": 4.4076062769904505,
+      "camera_z": 2.8131669304109557,
+      "shell_layers": 3,
+      "search_index": 0
+    },
+    "metadata": {
+      "signature": "b18a98f44f7e74c7",
+      "canonical": false,
+      "search_index": 0,
+      "view_energy": 0.6628464384505746,
+      "mode": "surface"
+    }
+  },
+  "frames": [
+    {
+      "index": 0,
+      "yaw_deg": 0.0,
+      "pitch_deg": 0.0,
+      "roll_deg": 0.0,
+      "depth": 0.0,
+      "twist": 0.0,
+      "perspective": 0.0
+    },
+    {
+      "index": 1,
+      "yaw_deg": 0.0,
+      "pitch_deg": 0.0,
+      "roll_deg": 0.0,
+      "depth": 0.017286754094436453,
+      "twist": 0.0,
+      "perspective": 0.0
+    },
+    {
+      "index": 2,
+      "yaw_deg": 0.2713019708999162,
+      "pitch_deg": -0.05712449104189844,
+      "roll_deg": -0.06249774945756031,
+      "depth": 0.48244370094245526,
+      "twist": 0.0,
+      "perspective": 0.00616036636966502
+    },
+    {
+      "index": 3,
+      "yaw_deg": 5.763712792008548,
+      "pitch_deg": -1.2135892660972536,
+      "roll_deg": -1.3277422085266424,
+      "depth": 0.6145319110453815,
+      "twist": 0.0,
+      "perspective": 0.13087476781138452
+    },
+    {
+      "index": 4,
+      "yaw_deg": 16.765905163081403,
+      "pitch_deg": -3.5301763423277004,
+      "roll_deg": -3.862232687937329,
+      "depth": 0.6145319110453815,
+      "twist": -0.018888466060672095,
+      "perspective": 0.3806980022336126
+    },
+    {
+      "index": 5,
+      "yaw_deg": 25.26249512881837,
+      "pitch_deg": -5.31919164426031,
+      "roll_deg": -5.819526802539037,
+      "depth": 0.6145319110453815,
+      "twist": -0.08825403331386641,
+      "perspective": 0.5736273307900512
+    },
+    {
+      "index": 6,
+      "yaw_deg": 26.87686842484851,
+      "pitch_deg": -5.659109015967772,
+      "roll_deg": -6.1914175685795385,
+      "depth": 0.6145319110453815,
+      "twist": -0.12962028353914545,
+      "perspective": 0.6102843846550161
+    },
+    {
+      "index": 7,
+      "yaw_deg": 26.876868424848517,
+      "pitch_deg": -5.659109015967768,
+      "roll_deg": -6.191417568579526,
+      "depth": 0.6145319110453815,
+      "twist": -0.13053390176057406,
+      "perspective": 0.6102843846550161
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "family": "superformula",
+  "family_percentile": 0.983871,
+  "family_z": 1.61856,
+  "id": "024",
+  "metadata": {
+    "iterations": 18000
+  },
+  "metrics": {
+    "bbox_fill": 0.311254,
+    "bbox_h": 0.866667,
+    "bbox_w": 0.9,
+    "border_ratio": 0.0,
+    "center_offset": 0.011285,
+    "components": 1.0,
+    "coverage": 0.242778,
+    "entropy": 0.818947,
+    "hard_coverage": 0.077222,
+    "hole_area": 0.105,
+    "holes": 7.0,
+    "largest_ratio": 1.0,
+    "perimeter_ratio": 1.354691,
+    "speckle_ratio": 0.0
+  },
+  "params": {
+    "m": 9,
+    "n1": 0.2512214279523495,
+    "n2": 2.689903514650672,
+    "n3": 3.2177849208281946,
+    "phase": 3.559127956288727,
+    "warp": 0.105495657336697,
+    "warp_freq": 2
+  },
+  "rank": 24,
+  "raw_score": 7.985123,
+  "seed": "poormans-hpc:superformula:00018",
+  "selection_score": 8.582396
+}

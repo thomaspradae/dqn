@@ -1,0 +1,35 @@
+{
+  "family": "clifford",
+  "family_percentile": 0.913043,
+  "family_z": 0.525919,
+  "id": "023",
+  "metadata": {
+    "iterations": 23100
+  },
+  "metrics": {
+    "bbox_fill": 0.404321,
+    "bbox_h": 0.8,
+    "bbox_w": 0.9,
+    "border_ratio": 0.0,
+    "center_offset": 0.176906,
+    "components": 3.0,
+    "coverage": 0.291111,
+    "entropy": 0.949948,
+    "hard_coverage": 0.125556,
+    "hole_area": 0.062222,
+    "holes": 6.0,
+    "largest_ratio": 0.994275,
+    "perimeter_ratio": 0.679389,
+    "speckle_ratio": 0.005725
+  },
+  "params": {
+    "a": 1.5218753878657398,
+    "b": 1.9607775296720455,
+    "c": 0.6087766921565783,
+    "d": 0.951549336391492
+  },
+  "rank": 23,
+  "raw_score": 8.350219,
+  "seed": "poormans-hpc:clifford:00013",
+  "selection_score": 8.658512
+}

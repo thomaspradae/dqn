@@ -1,0 +1,43 @@
+{
+  "family": "lissajous",
+  "family_percentile": 0.870968,
+  "family_z": 0.55792,
+  "id": "016",
+  "metadata": {
+    "iterations": 11000
+  },
+  "metrics": {
+    "bbox_fill": 0.435185,
+    "bbox_h": 0.866667,
+    "bbox_w": 0.9,
+    "border_ratio": 0.0,
+    "center_offset": 0.044616,
+    "components": 6.0,
+    "coverage": 0.339444,
+    "entropy": 0.86001,
+    "hard_coverage": 0.102222,
+    "hole_area": 0.045556,
+    "holes": 9.0,
+    "largest_ratio": 0.903437,
+    "perimeter_ratio": 0.919804,
+    "speckle_ratio": 0.00491
+  },
+  "params": {
+    "A": 0.8155823273062612,
+    "B": 0.6061969598440011,
+    "C": 0.9575261362495948,
+    "D": 0.6977036284205151,
+    "ax": 3,
+    "ay": 9,
+    "bx": 1,
+    "by": 8,
+    "p1": 1.1149919543265339,
+    "p2": 5.45833977078621,
+    "p3": 5.442156744598267,
+    "p4": 5.168860990230936
+  },
+  "rank": 16,
+  "raw_score": 8.53601,
+  "seed": "poormans-hpc:lissajous:00007",
+  "selection_score": 8.844267
+}

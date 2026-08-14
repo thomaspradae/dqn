@@ -3,7 +3,7 @@
 #SBATCH --output=/home/uace/dqn/atari/logs/dqn-pong-3d-%j.out
 #SBATCH --error=/home/uace/dqn/atari/logs/dqn-pong-3d-%j.err
 #SBATCH --partition=office
-#SBATCH --nodelist=uaceofi1
+#SBATCH --nodelist=ofi1
 #SBATCH --nodes=1
 #SBATCH --time=72:00:00
 #SBATCH --cpus-per-task=8

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Original vs Our De Jong Frames 0-128</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #08090b;
+    --panel: #111318;
+    --line: #292d35;
+    --text: #f2f3f5;
+    --muted: #969ca8;
+    --accent: #ff6a1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 17px; letter-spacing: 0; }
+  header span { color: var(--muted); font-size: 12px; }
+  main { max-width: 1500px; margin: 0 auto; padding: 20px; }
+  .comparison {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .viewer {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--line);
+    aspect-ratio: 16 / 9;
+  }
+  .viewer img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 5px 8px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: auto auto auto auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 24px;
+  }
+  button {
+    width: 40px;
+    height: 36px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+  }
+  button:hover { border-color: var(--accent); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  output { min-width: 70px; text-align: right; color: var(--accent); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .thumb {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 32 / 9;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+  }
+  .thumb-pair { display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: 100%; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; min-width: 0; }
+  .thumb span {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    padding: 2px 4px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 10px;
+  }
+  .thumb.active { border-color: var(--accent); }
+  @media (max-width: 700px) {
+    header { align-items: flex-start; flex-direction: column; }
+    main { padding: 12px; }
+    .comparison { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; }
+    .controls { grid-template-columns: auto auto auto auto; }
+    .controls input { grid-column: 1 / -1; }
+    output { grid-column: 1 / -1; text-align: left; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Original MP4 vs our generated states</h1>
+  <span>synchronized frames 0-128 / playback at 10 fps</span>
+</header>
+<main>
+  <div class="comparison">
+    <div class="viewer">
+      <img id="originalFrame" src="dejong_original_frames/frame_000.jpg" alt="Original video frame 0">
+      <div class="badge">ORIGINAL MP4 / FRAME <span id="originalBadge">0</span></div>
+    </div>
+    <div class="viewer">
+      <img id="oursFrame" src="dejong_ours_frames/frame_000.jpg" alt="Our generated state 0">
+      <div class="badge">OURS / ITERATION <span id="oursBadge">0</span></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button id="first" title="First frame">|&lt;</button>
+    <button id="previous" title="Previous frame">&lt;</button>
+    <button id="play" title="Play or pause">Play</button>
+    <button id="next" title="Next frame">&gt;</button>
+    <input id="scrubber" type="range" min="0" max="128" step="1" value="0" aria-label="Frame">
+    <output id="counter">0 / 128</output>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+  const FRAME_COUNT = 129;
+  const SOURCE_FPS = 10;
+  const originalFrame = document.getElementById('originalFrame');
+  const oursFrame = document.getElementById('oursFrame');
+  const originalBadge = document.getElementById('originalBadge');
+  const oursBadge = document.getElementById('oursBadge');
+  const counter = document.getElementById('counter');
+  const scrubber = document.getElementById('scrubber');
+  const playButton = document.getElementById('play');
+  const grid = document.getElementById('grid');
+  let current = 0;
+  let timer = null;
+
+  function originalPath(index) {
+    return 'dejong_original_frames/frame_' + String(index).padStart(3, '0') + '.jpg';
+  }
+
+  function oursPath(index) {
+    return 'dejong_ours_frames/frame_' + String(index).padStart(3, '0') + '.jpg';
+  }
+
+  function show(index, scrollThumbnail = false) {
+    current = Math.max(0, Math.min(FRAME_COUNT - 1, index));
+    originalFrame.src = originalPath(current);
+    originalFrame.alt = 'Original video frame ' + current;
+    oursFrame.src = oursPath(current);
+    oursFrame.alt = 'Our generated state ' + current;
+    originalBadge.textContent = current;
+    oursBadge.textContent = current;
+    counter.textContent = current + ' / ' + (FRAME_COUNT - 1);
+    scrubber.value = current;
+    document.querySelectorAll('.thumb.active').forEach(el => el.classList.remove('active'));
+    const active = document.querySelector('[data-frame="' + current + '"]');
+    if (active) {
+      active.classList.add('active');
+      if (scrollThumbnail) active.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    }
+  }
+
+  function pause() {
+    if (timer !== null) window.clearInterval(timer);
+    timer = null;
+    playButton.textContent = 'Play';
+  }
+
+  function togglePlayback() {
+    if (timer !== null) {
+      pause();
+      return;
+    }
+    playButton.textContent = 'Pause';
+    timer = window.setInterval(() => {
+      if (current >= FRAME_COUNT - 1) show(0);
+      else show(current + 1);
+    }, 1000 / SOURCE_FPS);
+  }
+
+  for (let index = 0; index < FRAME_COUNT; index++) {
+    const button = document.createElement('button');
+    button.className = 'thumb';
+    button.dataset.frame = index;
+    button.title = 'Show frame ' + index;
+    button.innerHTML = '<span>' + index + '</span><div class="thumb-pair">' +
+      '<img loading="lazy" src="' + originalPath(index) + '" alt="Original frame ' + index + '">' +
+      '<img loading="lazy" src="' + oursPath(index) + '" alt="Our iteration ' + index + '"></div>';
+    button.addEventListener('click', () => { pause(); show(index); });
+    grid.appendChild(button);
+  }
+
+  document.getElementById('first').addEventListener('click', () => { pause(); show(0, true); });
+  document.getElementById('previous').addEventListener('click', () => { pause(); show(current - 1, true); });
+  document.getElementById('next').addEventListener('click', () => { pause(); show(current + 1, true); });
+  playButton.addEventListener('click', togglePlayback);
+  scrubber.addEventListener('input', () => { pause(); show(Number(scrubber.value)); });
+  document.addEventListener('keydown', event => {
+    if (event.code === 'Space') { event.preventDefault(); togglePlayback(); }
+    if (event.code === 'ArrowLeft') { pause(); show(current - 1, true); }
+    if (event.code === 'ArrowRight') { pause(); show(current + 1, true); }
+    if (event.code === 'Home') { pause(); show(0, true); }
+    if (event.code === 'End') { pause(); show(FRAME_COUNT - 1, true); }
+  });
+  show(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "id": "015",
+  "family": "halvorsen",
+  "seed": "poormans-hpc-native3d:halvorsen:0001",
+  "params": {
+    "a": 1.4767120847848876
+  },
+  "initial": [
+    0.9376187094450728,
+    -0.07604893347352915,
+    0.04538479455594986
+  ],
+  "point_count": 7904,
+  "object_metrics": {
+    "lambda2_ratio": 0.9821728838121132,
+    "lambda3_ratio": 0.2573453690910378,
+    "box_dimension": 1.8106234491737083,
+    "octant_occupancy": 1.0,
+    "radial_cv": 0.31062235640883973,
+    "voxels_18": 583.0,
+    "local_lambda2_ratio": 0.4603653901170014,
+    "local_lambda3_ratio": 0.052939798967777583
+  },
+  "object_score": 5.82345568680579,
+  "canonical_pose": {
+    "pitch_deg": -6.938039506247802,
+    "yaw_deg": -54.379215766685775,
+    "roll_deg": -120.19282808959497,
+    "perspective": 0.02073105214168595
+  },
+  "projection_metrics": {
+    "coverage": 0.26944444444444443,
+    "hard_coverage": 0.12333333333333334,
+    "components": 3.0,
+    "largest_ratio": 0.9731958762886598,
+    "holes": 20.0,
+    "bbox_fill": 0.36854103343465044,
+    "perimeter_ratio": 0.8041237113402062,
+    "balance": 0.5979381443298969,
+    "edge_touches": 0.0,
+    "entropy": 3.3837307382114252,
+    "speckle": 0.3333333333333333,
+    "depth_complexity": 0.43769716088328076,
+    "dejong_spirit": 0.883828376837587
+  },
+  "projection_score": 3.7695917230308695,
+  "total_score": 6.215443111489302,
+  "target_pose": {
+    "pitch_deg": -39.03968546948582,
+    "yaw_deg": 27.19459945235485,
+    "roll_deg": -135.3159668316325,
+    "perspective": 0.08073105214168595
+  },
+  "metadata": {
+    "dt": 0.004,
+    "burn_steps": 5000,
+    "search_cameras": 24,
+    "topology": "volume",
+    "generator": "rk4"
+  }
+}

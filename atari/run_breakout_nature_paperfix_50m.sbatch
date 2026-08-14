@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=breakout-paperfix-50m
 #SBATCH --partition=office
-#SBATCH --nodelist=uaceofi1
+#SBATCH --nodelist=ofi1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=7G
 #SBATCH --time=3-00:00:00
@@ -27,7 +27,7 @@ free -h
 python train_nature.py \
   --env-id ALE/Breakout-v5 \
   --episodes 100000 \
-  --max-env-steps-total 50000000 \
+  --max-raw-env-frames-total 50000000 \
   --outdir runs/breakout_nature_paperfix_50m \
   --checkpoint-every 100
 

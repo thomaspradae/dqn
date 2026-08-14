@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=dqn-pong-resume
 #SBATCH --partition=office
-#SBATCH --nodelist=uaceofi1
+#SBATCH --nodelist=ofi1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=7G
 #SBATCH --time=3-00:00:00

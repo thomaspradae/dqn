@@ -1,0 +1,78 @@
+{
+  "id": "010",
+  "family": "fourier3d",
+  "seed": "poormans-hpc-native3d:fourier3d:0001",
+  "params": {
+    "x1_freq": 5.0,
+    "x2_freq": 9.0,
+    "y1_freq": 10.0,
+    "y2_freq": 8.0,
+    "z1_freq": 2.0,
+    "z2_freq": 1.0,
+    "x1_amp": 0.7356794757706072,
+    "y1_amp": 0.7883132665789228,
+    "z1_amp": 0.8589174279483844,
+    "x2_amp": 0.4914164940915467,
+    "y2_amp": 0.256542813513967,
+    "z2_amp": 0.3180029867101245,
+    "x1_phase": 2.7347867811213757,
+    "x2_phase": 4.297642357002268,
+    "y1_phase": 5.191369980790581,
+    "y2_phase": 5.6794347518840755,
+    "z1_phase": 5.736573509288274,
+    "z2_phase": 0.14244110312617642
+  },
+  "initial": [
+    0.011502870309915092,
+    -0.03274766692568012,
+    -0.025485365515046217
+  ],
+  "point_count": 7904,
+  "object_metrics": {
+    "lambda2_ratio": 0.9246237212288271,
+    "lambda3_ratio": 0.8227607997718014,
+    "box_dimension": 1.1800262809242303,
+    "octant_occupancy": 1.0,
+    "radial_cv": 0.3507690995462337,
+    "voxels_18": 440.0,
+    "local_lambda2_ratio": 0.3340722876680446,
+    "local_lambda3_ratio": 0.030498333262946042
+  },
+  "object_score": 5.833362534360256,
+  "canonical_pose": {
+    "pitch_deg": -6.375724352528511,
+    "yaw_deg": -83.83924733698981,
+    "roll_deg": -126.72084277500805,
+    "perspective": 0.10921247797686891
+  },
+  "projection_metrics": {
+    "coverage": 0.29055555555555557,
+    "hard_coverage": 0.125,
+    "components": 1.0,
+    "largest_ratio": 1.0,
+    "holes": 32.0,
+    "bbox_fill": 0.406055900621118,
+    "perimeter_ratio": 0.9445506692160612,
+    "balance": 0.8967495219885278,
+    "edge_touches": 0.0,
+    "entropy": 3.3804921251972577,
+    "speckle": 0.0,
+    "depth_complexity": 0.40070921985815605,
+    "dejong_spirit": 0.9140475244961065
+  },
+  "projection_score": 3.8949436856487796,
+  "total_score": 6.344955950080086,
+  "target_pose": {
+    "pitch_deg": -30.44643080558366,
+    "yaw_deg": -7.321094673741513,
+    "roll_deg": -134.95328927071964,
+    "perspective": 0.1692124779768689
+  },
+  "metadata": {
+    "dt": 1.0,
+    "burn_steps": 0,
+    "search_cameras": 24,
+    "topology": "curve",
+    "generator": "parametric_or_map"
+  }
+}

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=pong-nature-50m
 #SBATCH --partition=office
-#SBATCH --nodelist=uaceofi1
+#SBATCH --nodelist=ofi1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=7G
 #SBATCH --time=3-00:00:00
@@ -26,7 +26,7 @@ free -h
 python train_nature.py \
   --env-id ALE/Pong-v5 \
   --episodes 100000 \
-  --max-env-steps-total 50000000 \
+  --max-raw-env-frames-total 50000000 \
   --outdir runs/pong_nature_50m \
   --checkpoint-every 100
 

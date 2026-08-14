@@ -1,0 +1,35 @@
+{
+  "family": "dejong",
+  "family_percentile": 0.958333,
+  "family_z": 1.262515,
+  "id": "003",
+  "metadata": {
+    "iterations": 23100
+  },
+  "metrics": {
+    "bbox_fill": 0.406923,
+    "bbox_h": 0.866667,
+    "bbox_w": 0.833333,
+    "border_ratio": 0.0,
+    "center_offset": 0.158077,
+    "components": 6.0,
+    "coverage": 0.293889,
+    "entropy": 0.903945,
+    "hard_coverage": 0.111667,
+    "hole_area": 0.127222,
+    "holes": 8.0,
+    "largest_ratio": 0.975425,
+    "perimeter_ratio": 0.8431,
+    "speckle_ratio": 0.007561
+  },
+  "params": {
+    "a": 1.1036280556024876,
+    "b": -2.3488637200949047,
+    "c": 2.036618846987413,
+    "d": -1.9166980759704617
+  },
+  "rank": 3,
+  "raw_score": 8.64764,
+  "seed": "poormans-hpc:dejong:00031",
+  "selection_score": 9.150273
+}

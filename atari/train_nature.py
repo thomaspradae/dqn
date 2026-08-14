@@ -1,6 +1,13 @@
 import argparse
 import csv
+import hashlib
+import json
+import os
 import random
+import socket
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 import ale_py
@@ -10,6 +17,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 
+from deepmind_rmsprop import DeepMindRMSprop
 from network import QNetwork
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,13 +25,164 @@ print(f"Using device: {device}")
 
 gym.register_envs(ale_py)
 
+RESIZE_INTERPOLATIONS = {
+    "area": cv2.INTER_AREA,
+    "bilinear": cv2.INTER_LINEAR,
+}
 
-def preprocess_frame(obs, previous_obs=None):
+
+def set_global_seed(seed):
+    if seed is None:
+        return
+
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def sha256_file(path):
+    path = Path(path)
+    if not path.exists():
+        return None
+
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def get_git_commit():
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return "no_git"
+
+
+def get_git_dirty():
+    try:
+        out = subprocess.check_output(
+            ["git", "status", "--porcelain"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+        return bool(out.strip())
+    except Exception:
+        return None
+
+
+def package_version(module):
+    return getattr(module, "__version__", "unknown")
+
+
+def write_run_metadata(outdir, args):
+    code_files = [
+        "train_nature.py",
+        "network.py",
+        "eval.py",
+        "eval_checkpoint.py",
+    ]
+    metadata = {
+        "schema_version": 2,
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "hostname": socket.gethostname(),
+        "command": " ".join(sys.argv),
+        "argv": sys.argv,
+        "args": vars(args),
+        "seed": args.seed,
+        "env_id": args.env_id,
+        "budget_unit": (
+            "agent_decisions"
+            if args.max_agent_steps_total is not None
+            else "raw_emulator_frames"
+            if args.max_raw_env_frames_total is not None
+            else "episodes"
+        ),
+        "budget_agent_decisions": args.max_agent_steps_total,
+        "budget_raw_emulator_frames": (
+            args.max_agent_steps_total * args.frame_skip
+            if args.max_agent_steps_total is not None
+            else args.max_raw_env_frames_total
+        ),
+        "optimizer": {
+            "name": args.optimizer,
+            "alpha": 0.95,
+            "eps": 0.01,
+            "momentum": 0.0 if args.optimizer == "deepmind_rmsprop" else 0.95,
+            "centered": args.optimizer == "deepmind_rmsprop",
+            "epsilon_inside_sqrt": args.optimizer == "deepmind_rmsprop",
+        },
+        "resize_interpolation": args.resize_interpolation,
+        "git_commit": get_git_commit(),
+        "git_dirty": get_git_dirty(),
+        "code_sha256": {path: sha256_file(path) for path in code_files},
+        "python_version": sys.version,
+        "torch_version": torch.__version__,
+        "gymnasium_version": package_version(gym),
+        "ale_py_version": package_version(ale_py),
+        "cv2_version": package_version(cv2),
+        "numpy_version": np.__version__,
+        "device": str(device),
+        "cuda_available": torch.cuda.is_available(),
+        "replay_buffer_checkpointed": False,
+        "resume_supported": False,
+        "notes": [
+            "Replay buffer is not checkpointed; checkpoint dict is diagnostic/resumable metadata, not exact replay-state resume.",
+            "Evaluation is intentionally watcher/queue based, not inline inside train_nature.py.",
+        ],
+    }
+    metadata_path = outdir / "RUN_METADATA.json"
+    legacy_path = outdir / "run_metadata.json"
+    with metadata_path.open("w") as f:
+        json.dump(metadata, f, indent=2, sort_keys=True)
+    with legacy_path.open("w") as f:
+        json.dump(metadata, f, indent=2, sort_keys=True)
+
+
+def run_dir_has_training_artifacts(outdir):
+    artifact_patterns = (
+        "q_net_ep*.pt",
+        "checkpoint_ep*.pt",
+        "q_net_final.pt",
+        "checkpoint_final.pt",
+        "rewards.csv",
+        "checkpoints.csv",
+        "eval_results.csv",
+    )
+    return [path for pattern in artifact_patterns for path in outdir.glob(pattern)]
+
+
+def rng_state():
+    return {
+        "python": random.getstate(),
+        "numpy": np.random.get_state(),
+        "torch": torch.get_rng_state(),
+        "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+    }
+
+
+def preprocess_frame(obs, previous_obs=None, resize_interpolation="area"):
     if previous_obs is not None:
         obs = np.maximum(obs, previous_obs)
 
     gray = cv2.cvtColor(obs, cv2.COLOR_RGB2YUV)[:, :, 0]
-    resized = cv2.resize(gray, (84, 84), interpolation=cv2.INTER_AREA)
+    resized = cv2.resize(
+        gray,
+        (84, 84),
+        interpolation=RESIZE_INTERPOLATIONS[resize_interpolation],
+    )
     return resized
 
 
@@ -184,6 +343,59 @@ def clipped_td_error_loss(predictions, targets):
     return (0.5 * quadratic.pow(2) + linear).mean()
 
 
+def clip_transition_reward(total_raw_reward):
+    """Clip the action-repeat return before it enters replay memory."""
+    return max(-1.0, min(1.0, float(total_raw_reward)))
+
+
+def epsilon_for_agent_step(args, agent_step):
+    """Match DeepMind's epsilon schedule: decay after learning starts."""
+    decay_progress = max(0, agent_step - args.learning_starts)
+    progress = min(decay_progress / args.epsilon_decay, 1.0)
+    return args.epsilon_start + progress * (args.epsilon_end - args.epsilon_start)
+
+
+def should_learn(perceived_step, learning_starts, train_freq):
+    """Match DeepMind's pre-increment `numSteps` update check."""
+    return perceived_step > learning_starts and perceived_step % train_freq == 0
+
+
+def should_update_target(agent_step, target_update_freq):
+    """Mirror DeepMind's `numSteps % target_q == 1` target-copy schedule."""
+    return agent_step % target_update_freq == 1
+
+
+def counter_smoke_summary(agent_steps, frame_skip, learning_starts, train_freq, target_update_freq, trace=False):
+    update_pre_increment_steps = [
+        step for step in range(agent_steps) if should_learn(step, learning_starts, train_freq)
+    ]
+    target_post_increment_steps = [
+        step for step in range(1, agent_steps + 1) if should_update_target(step, target_update_freq)
+    ]
+    summary = {
+        "agent_decisions": agent_steps,
+        "nominal_raw_action_frames": agent_steps * frame_skip,
+        "optimizer_updates": len(update_pre_increment_steps),
+        "target_copies": len(target_post_increment_steps),
+    }
+    if trace:
+        summary["update_pre_increment_steps"] = update_pre_increment_steps
+        summary["target_post_increment_steps"] = target_post_increment_steps
+    return summary
+
+
+def build_optimizer(args, parameters):
+    if args.optimizer == "deepmind_rmsprop":
+        return DeepMindRMSprop(parameters, lr=args.lr, alpha=0.95, eps=0.01)
+    return optim.RMSprop(
+        parameters,
+        lr=args.lr,
+        alpha=0.95,
+        eps=0.01,
+        momentum=0.95,
+    )
+
+
 def get_noop_action(env):
     get_action_meanings = getattr(env.unwrapped, "get_action_meanings", None)
     if get_action_meanings is None:
@@ -196,8 +408,11 @@ def get_noop_action(env):
     return 0
 
 
-def reset_with_noops(env, noop_max, max_noop_steps=None):
-    obs, info = env.reset()
+def reset_with_noops(env, noop_max, max_noop_steps=None, seed=None):
+    if seed is None:
+        obs, info = env.reset()
+    else:
+        obs, info = env.reset(seed=seed)
 
     if noop_max <= 0 or max_noop_steps == 0:
         return obs, info, 0
@@ -227,27 +442,80 @@ def get_lives(env):
     return ale.lives()
 
 
-def save_checkpoint(path, episode, env_step, train_step, q_net, target_net, optimizer, args):
+def save_checkpoint(path, episode, env_step, agent_step, train_step, target_update_count, epsilon, q_net, target_net, optimizer, args):
     torch.save(
         {
             "episode": episode,
             "env_step": env_step,
+            "agent_step": agent_step,
             "train_step": train_step,
+            "target_update_count": target_update_count,
+            "epsilon": epsilon,
+            "q_net": q_net.state_dict(),
+            "target_net": target_net.state_dict(),
+            "optimizer": optimizer.state_dict(),
             "model_state_dict": q_net.state_dict(),
             "target_model_state_dict": target_net.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "args": vars(args),
+            "rng": rng_state(),
+            "schema_version": 2,
         },
         path,
     )
 
 
+def append_checkpoint_manifest(outdir, episode, env_step, agent_step, train_step, epsilon, q_net_path, checkpoint_path):
+    manifest_path = outdir / "checkpoints.csv"
+    write_header = not manifest_path.exists() or manifest_path.stat().st_size == 0
+    with manifest_path.open("a", newline="") as f:
+        writer = csv.writer(f)
+        if write_header:
+            writer.writerow(
+                [
+                    "timestamp",
+                    "episode",
+                    "env_step",
+                    "agent_step",
+                    "train_step",
+                    "epsilon",
+                    "q_net_path",
+                    "checkpoint_path",
+                ]
+            )
+        writer.writerow(
+            [
+                time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                episode,
+                env_step,
+                agent_step,
+                train_step,
+                f"{epsilon:.6f}",
+                q_net_path,
+                checkpoint_path,
+            ]
+        )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env-id", type=str, default="ALE/Pong-v5")
-    parser.add_argument("--episodes", type=int, default=1)
+    parser.add_argument("--episodes", type=int, default=100_000)
     parser.add_argument("--outdir", type=str, default="runs/atari")
+    parser.add_argument("--run-dir", dest="outdir", type=str, default=argparse.SUPPRESS)
     parser.add_argument("--lr", type=float, default=2.5e-4)
+    parser.add_argument(
+        "--optimizer",
+        choices=("pytorch_rmsprop", "deepmind_rmsprop"),
+        default="pytorch_rmsprop",
+        help="optimizer implementation; the active v3 baseline uses pytorch_rmsprop",
+    )
+    parser.add_argument(
+        "--resize-interpolation",
+        choices=tuple(RESIZE_INTERPOLATIONS),
+        default="area",
+        help="84x84 resize method; released DeepMind code uses bilinear",
+    )
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--epsilon-start", type=float, default=1.0)
     parser.add_argument("--epsilon-end", type=float, default=0.1)
@@ -258,12 +526,43 @@ def main():
     parser.add_argument("--replay-size", type=int, default=1_000_000)
     parser.add_argument("--learning-starts", type=int, default=50_000)
     parser.add_argument("--checkpoint-every", type=int, default=100)
+    parser.add_argument(
+        "--checkpoint-every-episodes",
+        dest="checkpoint_every",
+        type=int,
+        default=argparse.SUPPRESS,
+    )
     parser.add_argument("--max-steps-per-episode", type=int, default=None)
-    parser.add_argument("--max-env-steps-total", type=int, default=None)
+    parser.add_argument(
+        "--max-agent-steps-total",
+        type=int,
+        default=None,
+        help="selected-action / perceived-state budget",
+    )
+    parser.add_argument(
+        "--max-raw-env-frames-total",
+        type=int,
+        default=None,
+        help="raw emulator-frame budget, including reset no-ops",
+    )
+    parser.add_argument(
+        "--counter-smoke-test",
+        action="store_true",
+        help="print deterministic counter totals and exit without creating an environment",
+    )
+    parser.add_argument("--trace-counters", action="store_true")
     parser.add_argument("--frame-skip", type=int, default=4)
     parser.add_argument("--noop-max", type=int, default=30)
     parser.add_argument("--threads", type=int, default=8)
+    parser.add_argument("--diagnostics-every-agent-steps", type=int, default=50_000)
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--allow-existing-run-dir", action="store_true")
     parser.add_argument("--debug-shapes", action="store_true")
+    parser.add_argument(
+        "--life-loss-terminal",
+        dest="life_loss_terminal",
+        action="store_true",
+    )
     parser.add_argument(
         "--no-life-loss-terminal",
         dest="life_loss_terminal",
@@ -292,47 +591,95 @@ def main():
         parser.error("--train-freq must be >= 1")
     if args.learning_starts < 0:
         parser.error("--learning-starts must be >= 0")
-    if args.max_env_steps_total is not None and args.max_env_steps_total < 1:
-        parser.error("--max-env-steps-total must be >= 1")
+    if args.checkpoint_every < 1:
+        parser.error("--checkpoint-every must be >= 1")
+    if args.diagnostics_every_agent_steps < 1:
+        parser.error("--diagnostics-every-agent-steps must be >= 1")
+    if args.max_agent_steps_total is not None and args.max_agent_steps_total < 1:
+        parser.error("--max-agent-steps-total must be >= 1")
+    if args.max_raw_env_frames_total is not None and args.max_raw_env_frames_total < 1:
+        parser.error("--max-raw-env-frames-total must be >= 1")
+    if args.max_agent_steps_total is not None and args.max_raw_env_frames_total is not None:
+        parser.error("use only one of --max-agent-steps-total or --max-raw-env-frames-total")
     if args.resume is not None:
         parser.error("--resume is disabled because replay memory is not checkpointed")
     if args.start_episode != 0 or args.start_env_step != 0 or args.start_train_step != 0:
         parser.error("--start-* counters are disabled because replay memory is not checkpointed")
 
+    if args.counter_smoke_test:
+        if args.max_agent_steps_total is None:
+            parser.error("--counter-smoke-test requires --max-agent-steps-total")
+        print(
+            json.dumps(
+                counter_smoke_summary(
+                    args.max_agent_steps_total,
+                    args.frame_skip,
+                    args.learning_starts,
+                    args.train_freq,
+                    args.target_update_freq,
+                    trace=args.trace_counters,
+                ),
+                sort_keys=True,
+            )
+        )
+        return
+
+    set_global_seed(args.seed)
     torch.set_num_threads(args.threads)
 
     outdir = Path(args.outdir)
+    if outdir.exists() and not args.allow_existing_run_dir:
+        artifacts = run_dir_has_training_artifacts(outdir)
+        if artifacts:
+            names = ", ".join(path.name for path in sorted(artifacts)[:8])
+            if len(artifacts) > 8:
+                names += ", ..."
+            raise SystemExit(
+                f"refusing to start in non-empty run dir with training artifacts: {outdir} ({names}). "
+                "Use a new --run-dir, or pass --allow-existing-run-dir only for deliberate debugging."
+            )
     outdir.mkdir(parents=True, exist_ok=True)
+    write_run_metadata(outdir, args)
 
     env = gym.make(args.env_id, frameskip=1, repeat_action_probability=0.0)
+    if args.seed is not None:
+        env.action_space.seed(args.seed)
+        if hasattr(env.observation_space, "seed"):
+            env.observation_space.seed(args.seed)
     num_actions = env.action_space.n
 
     q_net = QNetwork(num_actions).to(device)
     target_net = QNetwork(num_actions).to(device)
     target_net.load_state_dict(q_net.state_dict())
 
-    optimizer = optim.RMSprop(
-        q_net.parameters(),
-        lr=args.lr,
-        alpha=0.95,
-        eps=0.01,
-        momentum=0.95,
-    )
+    optimizer = build_optimizer(args, q_net.parameters())
     loss_fn = clipped_td_error_loss
 
     start_episode = 0
     env_step = 0
     step = 0
     action_step = 0
+    target_update_count = 0
 
     replay_buffer = ReplayMemory(args.replay_size)
     printed_debug_shapes = False
+    action_counts = np.zeros(num_actions, dtype=np.int64)
+    clipped_reward_counts = {"-1": 0, "0": 0, "+1": 0}
+    life_loss_count = 0
+    diagnostics = {"loss": [], "td_abs": [], "q_selected": [], "q_max": [], "grad_norm": []}
 
     rewards_csv = outdir / "rewards.csv"
+    diagnostics_csv = outdir / "training_diagnostics.csv"
     csv_mode = "w"
     write_header = True
 
     last_episode = start_episode - 1
+    diagnostics_file = diagnostics_csv.open("w", newline="")
+    diagnostics_writer = csv.DictWriter(
+        diagnostics_file,
+        fieldnames=["agent_step", "env_step", "train_step", "episode", "epsilon", "raw_episode_return", "loss_mean", "td_error_abs_mean", "td_error_abs_p95", "q_selected_mean", "q_max_mean", "q_max_abs_max", "grad_norm_mean", "clip_neg1", "clip_zero", "clip_pos1", "life_loss_count", "target_copy_count", "action_counts"],
+    )
+    diagnostics_writer.writeheader()
 
     with open(rewards_csv, csv_mode, newline="") as f:
         writer = csv.writer(f)
@@ -342,20 +689,26 @@ def main():
         for episode in range(start_episode, args.episodes):
             last_episode = episode
             max_noop_steps = None
-            if args.max_env_steps_total is not None:
-                max_noop_steps = max(args.max_env_steps_total - env_step, 0)
+            if args.max_raw_env_frames_total is not None:
+                max_noop_steps = max(args.max_raw_env_frames_total - env_step, 0)
 
             obs, info, noop_steps = reset_with_noops(
                 env,
                 args.noop_max,
                 max_noop_steps=max_noop_steps,
+                seed=args.seed if episode == start_episode else None,
             )
             env_step += noop_steps
 
-            if args.max_env_steps_total is not None and env_step >= args.max_env_steps_total:
+            if (
+                args.max_raw_env_frames_total is not None
+                and env_step >= args.max_raw_env_frames_total
+            ):
                 break
 
-            state = replay_buffer.start_episode(preprocess_frame(obs))
+            state = replay_buffer.start_episode(
+                preprocess_frame(obs, resize_interpolation=args.resize_interpolation)
+            )
             last_raw_obs = obs
             lives = get_lives(env)
             episode_done = False
@@ -364,6 +717,19 @@ def main():
             epsilon = args.epsilon_start
 
             while not episode_done:
+                if (
+                    args.max_agent_steps_total is not None
+                    and action_step >= args.max_agent_steps_total
+                ):
+                    episode_done = True
+                    break
+                if (
+                    args.max_raw_env_frames_total is not None
+                    and env_step >= args.max_raw_env_frames_total
+                ):
+                    episode_done = True
+                    break
+
                 state_tensor = torch.as_tensor(
                     state,
                     dtype=torch.float32,
@@ -373,15 +739,15 @@ def main():
                 with torch.no_grad():
                     q_values = q_net(state_tensor)
 
-                progress = min(env_step / args.epsilon_decay, 1.0)
-                epsilon = args.epsilon_start + progress * (args.epsilon_end - args.epsilon_start)
+                epsilon = epsilon_for_agent_step(args, action_step)
 
                 if random.random() < epsilon:
                     action = env.action_space.sample()
                 else:
                     action = q_values.argmax(dim=1).item()
+                action_counts[action] += 1
 
-                total_reward = 0.0
+                raw_action_reward = 0.0
                 previous_raw_obs = last_raw_obs
                 env_done = False
                 forced_done = False
@@ -393,13 +759,12 @@ def main():
                     last_raw_obs = next_obs
                     env_step += 1
 
-                    clipped_reward = max(-1.0, min(1.0, reward))
-                    total_reward += clipped_reward
+                    raw_action_reward += reward
 
                     if env_step % 1000 == 0:
                         print(
-                            f"env_step={env_step} train_step={step} "
-                            f"episode={episode} reward={episode_reward + total_reward} "
+                            f"env_step={env_step} agent_step={action_step} train_step={step} "
+                            f"episode={episode} reward={episode_reward + raw_action_reward} "
                             f"epsilon={epsilon:.3f}",
                             flush=True,
                         )
@@ -409,17 +774,26 @@ def main():
                     current_lives = get_lives(env)
                     if args.life_loss_terminal and lives > 0 and current_lives < lives:
                         life_lost = True
+                        life_loss_count += 1
                     lives = current_lives
 
-                    if args.max_env_steps_total is not None and env_step >= args.max_env_steps_total:
+                    if (
+                        args.max_raw_env_frames_total is not None
+                        and env_step >= args.max_raw_env_frames_total
+                    ):
                         forced_done = True
 
                     if env_done or forced_done or life_lost:
                         break
 
                 episode_steps += 1
-                action_step += 1
-                episode_reward += total_reward
+                completed_agent_step = action_step + 1
+                episode_reward += raw_action_reward
+                if (
+                    args.max_agent_steps_total is not None
+                    and completed_agent_step >= args.max_agent_steps_total
+                ):
+                    forced_done = True
                 episode_done = env_done or forced_done
                 transition_terminal = episode_done or life_lost
 
@@ -427,10 +801,18 @@ def main():
                     episode_done = True
                     transition_terminal = True
 
-                next_frame = preprocess_frame(last_raw_obs, previous_raw_obs)
+                next_frame = preprocess_frame(
+                    last_raw_obs,
+                    previous_raw_obs,
+                    resize_interpolation=args.resize_interpolation,
+                )
+                transition_reward = clip_transition_reward(raw_action_reward)
+                clipped_reward_counts[
+                    "+1" if transition_reward > 0 else "-1" if transition_reward < 0 else "0"
+                ] += 1
                 next_state = replay_buffer.append(
                     action,
-                    total_reward,
+                    transition_reward,
                     next_frame,
                     transition_terminal,
                 )
@@ -438,9 +820,8 @@ def main():
                     next_state = replay_buffer.start_episode(next_frame)
 
                 if (
-                    env_step >= args.learning_starts
+                    should_learn(action_step, args.learning_starts, args.train_freq)
                     and len(replay_buffer) >= args.batch_size
-                    and action_step % args.train_freq == 0
                 ):
                     states, actions, rewards, next_states, dones = replay_buffer.sample(
                         args.batch_size
@@ -464,15 +845,53 @@ def main():
                     predictions = q_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
                     loss = loss_fn(predictions, targets)
+                    td_abs = (predictions.detach() - targets).abs()
 
                     optimizer.zero_grad()
                     loss.backward()
+                    grad_norm = torch.sqrt(
+                        sum(
+                            parameter.grad.detach().pow(2).sum()
+                            for parameter in q_net.parameters()
+                            if parameter.grad is not None
+                        )
+                    ).item()
                     optimizer.step()
 
                     step += 1
+                    diagnostics["loss"].append(loss.item())
+                    diagnostics["td_abs"].extend(td_abs.detach().cpu().tolist())
+                    diagnostics["q_selected"].extend(predictions.detach().cpu().tolist())
+                    diagnostics["q_max"].extend(q_net(states).detach().max(dim=1).values.cpu().tolist())
+                    diagnostics["grad_norm"].append(grad_norm)
 
-                    if step % args.target_update_freq == 0:
-                        target_net.load_state_dict(q_net.state_dict())
+                action_step = completed_agent_step
+                if should_update_target(action_step, args.target_update_freq):
+                    target_net.load_state_dict(q_net.state_dict())
+                    target_update_count += 1
+
+                if action_step % args.diagnostics_every_agent_steps == 0:
+                    def diag_mean(key):
+                        values = diagnostics[key]
+                        return float(np.mean(values)) if values else ""
+
+                    diagnostics_writer.writerow({
+                        "agent_step": action_step, "env_step": env_step, "train_step": step,
+                        "episode": episode, "epsilon": f"{epsilon:.6f}",
+                        "raw_episode_return": episode_reward,
+                        "loss_mean": diag_mean("loss"), "td_error_abs_mean": diag_mean("td_abs"),
+                        "td_error_abs_p95": float(np.percentile(diagnostics["td_abs"], 95)) if diagnostics["td_abs"] else "",
+                        "q_selected_mean": diag_mean("q_selected"), "q_max_mean": diag_mean("q_max"),
+                        "q_max_abs_max": float(np.max(np.abs(diagnostics["q_max"]))) if diagnostics["q_max"] else "",
+                        "grad_norm_mean": diag_mean("grad_norm"),
+                        "clip_neg1": clipped_reward_counts["-1"], "clip_zero": clipped_reward_counts["0"], "clip_pos1": clipped_reward_counts["+1"],
+                        "life_loss_count": life_loss_count, "target_copy_count": target_update_count,
+                        "action_counts": json.dumps(action_counts.tolist()),
+                    })
+                    diagnostics_file.flush()
+                    action_counts.fill(0)
+                    clipped_reward_counts = {"-1": 0, "0": 0, "+1": 0}
+                    diagnostics = {"loss": [], "td_abs": [], "q_selected": [], "q_max": [], "grad_norm": []}
 
                 state = next_state
 
@@ -482,32 +901,69 @@ def main():
             print(f"episode={episode} reward={episode_reward} epsilon={epsilon:.3f}", flush=True)
 
             if episode % args.checkpoint_every == 0 and episode > 0:
-                torch.save(q_net.state_dict(), outdir / f"q_net_ep{episode}.pt")
+                q_net_path = outdir / f"q_net_ep{episode}.pt"
+                checkpoint_path = outdir / f"checkpoint_ep{episode}.pt"
+                torch.save(q_net.state_dict(), q_net_path)
                 save_checkpoint(
-                    outdir / f"checkpoint_ep{episode}.pt",
+                    checkpoint_path,
                     episode,
                     env_step,
+                    action_step,
                     step,
+                    target_update_count,
+                    epsilon,
                     q_net,
                     target_net,
                     optimizer,
                     args,
                 )
+                append_checkpoint_manifest(
+                    outdir,
+                    episode,
+                    env_step,
+                    action_step,
+                    step,
+                    epsilon,
+                    q_net_path.name,
+                    checkpoint_path.name,
+                )
 
-            if args.max_env_steps_total is not None and env_step >= args.max_env_steps_total:
+            if (
+                args.max_agent_steps_total is not None
+                and action_step >= args.max_agent_steps_total
+            ) or (
+                args.max_raw_env_frames_total is not None
+                and env_step >= args.max_raw_env_frames_total
+            ):
                 break
 
-    torch.save(q_net.state_dict(), outdir / "q_net_final.pt")
+    q_net_final_path = outdir / "q_net_final.pt"
+    checkpoint_final_path = outdir / "checkpoint_final.pt"
+    torch.save(q_net.state_dict(), q_net_final_path)
     save_checkpoint(
-        outdir / "checkpoint_final.pt",
+        checkpoint_final_path,
         last_episode,
         env_step,
+        action_step,
         step,
+        target_update_count,
+        epsilon if "epsilon" in locals() else args.epsilon_start,
         q_net,
         target_net,
         optimizer,
         args,
     )
+    append_checkpoint_manifest(
+        outdir,
+        last_episode,
+        env_step,
+        action_step,
+        step,
+        epsilon if "epsilon" in locals() else args.epsilon_start,
+        q_net_final_path.name,
+        checkpoint_final_path.name,
+    )
+    diagnostics_file.close()
     env.close()
 
 

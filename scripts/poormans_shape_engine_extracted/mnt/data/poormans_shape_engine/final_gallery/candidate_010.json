@@ -1,0 +1,35 @@
+{
+  "family": "hypotrochoid",
+  "family_percentile": 0.984127,
+  "family_z": 0.880645,
+  "id": "010",
+  "metadata": {
+    "iterations": 22000
+  },
+  "metrics": {
+    "bbox_fill": 0.310714,
+    "bbox_h": 0.933333,
+    "bbox_w": 0.833333,
+    "border_ratio": 0.0,
+    "center_offset": 0.009278,
+    "components": 1.0,
+    "coverage": 0.241667,
+    "entropy": 0.922902,
+    "hard_coverage": 0.103333,
+    "hole_area": 0.128333,
+    "holes": 14.0,
+    "largest_ratio": 1.0,
+    "perimeter_ratio": 1.103448,
+    "speckle_ratio": 0.0
+  },
+  "params": {
+    "R": 13,
+    "d": 3.62295184732493,
+    "phase": 4.456372928302172,
+    "r": 3
+  },
+  "rank": 10,
+  "raw_score": 8.62211,
+  "seed": "poormans-hpc:hypotrochoid:00043",
+  "selection_score": 9.033477
+}
